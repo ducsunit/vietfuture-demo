@@ -11,7 +11,7 @@ class User extends Model
     use HasFactory;
 
     protected $fillable = [
-        'username', 'password', 'age', 'role', 'point'
+        'username', 'password', 'age', 'role', 'point', 'display_name'
     ];
 
     protected $hidden = ['password'];
@@ -19,6 +19,22 @@ class User extends Model
     public function setPasswordAttribute($value): void
     {
         $this->attributes['password'] = Hash::make($value);
+    }
+
+    // Relationships
+    public function progressRecords()
+    {
+        return $this->hasMany(ProgressRecord::class);
+    }
+
+    public function communityThreads()
+    {
+        return $this->hasMany(CommunityThread::class);
+    }
+
+    public function communityComments()
+    {
+        return $this->hasMany(CommunityComment::class);
     }
 }
 

@@ -12,8 +12,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([
-            ActivationSeeder::class,
-        ]);
+        // Có thể thêm seeders khác ở đây nếu cần
     }
 }

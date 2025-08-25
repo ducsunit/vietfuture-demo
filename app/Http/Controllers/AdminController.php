@@ -41,7 +41,7 @@ class AdminController extends Controller
             $payload['content'] = json_encode($content, JSON_UNESCAPED_UNICODE);
         }
         Book::create($payload);
-        return redirect()->route('admin.books.index');
+        return redirect()->route('admin.books.index')->with('success', 'Đã tạo sách thành công!');
     }
 
     public function booksEdit(int $id)
@@ -70,14 +70,15 @@ class AdminController extends Controller
             $payload['content'] = json_encode($content, JSON_UNESCAPED_UNICODE);
         }
         $book->update($payload);
-        return redirect()->route('admin.books.index');
+        return redirect()->route('admin.books.index')->with('success', 'Đã cập nhật sách thành công!');
     }
 
     public function booksDestroy(int $id)
     {
         $book = Book::findOrFail($id);
+        $bookTitle = $book->title;
         $book->delete();
-        return redirect()->route('admin.books.index');
+        return redirect()->route('admin.books.index')->with('success', "Đã xóa sách '{$bookTitle}' thành công!");
     }
 
     // Users
@@ -97,10 +98,18 @@ class AdminController extends Controller
         $data = $request->validate([
             'username' => 'required|string|min:3|max:50|unique:users,username',
             'password' => 'required|string|min:6|max:100',
+            'display_name' => 'nullable|string|max:100',
             'age' => 'nullable|string|max:20',
+            'point' => 'nullable|integer|min:0',
+            'role' => 'nullable|integer|in:0,1',
         ]);
+        
+        // Set default values
+        $data['point'] = $data['point'] ?? 0;
+        $data['role'] = $data['role'] ?? 0;
+        
         User::create($data);
-        return redirect()->route('admin.users.index');
+        return redirect()->route('admin.users.index')->with('success', 'Đã tạo user thành công!');
     }
 
     public function usersEdit(int $id)
@@ -115,18 +124,29 @@ class AdminController extends Controller
         $data = $request->validate([
             'username' => 'required|string|min:3|max:50|unique:users,username,' . $user->id,
             'password' => 'nullable|string|min:6|max:100',
+            'display_name' => 'nullable|string|max:100',
             'age' => 'nullable|string|max:20',
+            'point' => 'nullable|integer|min:0',
+            'role' => 'nullable|integer|in:0,1',
         ]);
+        
+        // Remove empty password
         if (empty($data['password'])) unset($data['password']);
+        
+        // Set default values
+        $data['point'] = $data['point'] ?? $user->point ?? 0;
+        $data['role'] = $data['role'] ?? $user->role ?? 0;
+        
         $user->update($data);
-        return redirect()->route('admin.users.index');
+        return redirect()->route('admin.users.index')->with('success', 'Đã cập nhật user thành công!');
     }
 
     public function usersDestroy(int $id)
     {
         $user = User::findOrFail($id);
+        $username = $user->username;
         $user->delete();
-        return redirect()->route('admin.users.index');
+        return redirect()->route('admin.users.index')->with('success', "Đã xóa user '{$username}' thành công!");
     }
 }
 

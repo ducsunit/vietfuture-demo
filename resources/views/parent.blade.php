@@ -3,14 +3,77 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Bảng điều khiển phụ huynh</title>
+    <title>📊 Bảng Theo Dõi Học Tập - VietFuture</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Comic+Neue:wght@300;400;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="{{ asset('css/quiz.css') }}" />
+    <link rel="stylesheet" href="{{ asset('css/navigation.css') }}" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </head>
   <body>
+    <header class="header-nav fade-in">
+      <div class="header-container">
+        <div class="logo-section">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+              <path d="M20 22V8a2 2 0 0 0-2-2h-7l-2-2H6a2 2 0 0 0-2 2v12" />
+            </svg>
+          </div>
+          <h1 class="logo-text">📊 VietFuture Dashboard</h1>
+        </div>
+        
+        @if(session('user_id'))
+          <nav class="nav-menu">
+            <a href="{{ route('welcome') }}" class="nav-link">
+              <span class="nav-emoji">🏠</span>
+              <span>Trang chủ</span>
+            </a>
+            <a href="{{ route('quiz') }}" class="nav-link">
+              <span class="nav-emoji">🎮</span>
+              <span>Quiz</span>
+            </a>
+            <a href="{{ route('parent') }}" class="nav-link active">
+              <span class="nav-emoji">👨‍👩‍👧</span>
+              <span>Dashboard</span>
+            </a>
+            <a href="{{ route('community.index') }}" class="nav-link">
+              <span class="nav-emoji">💬</span>
+              <span>Cộng đồng</span>
+            </a>
+            <a href="#" onclick="alert('Cửa hàng chỉ có trong trang Quiz')" class="nav-link disabled">
+              <span class="nav-emoji">🛍️</span>
+              <span>Cửa hàng</span>
+            </a>
+            <a href="#" onclick="alert('Bộ sưu tập chỉ có trong trang Quiz')" class="nav-link disabled">
+              <span class="nav-emoji">📚</span>
+              <span>Bộ sưu tập</span>
+            </a>
+          </nav>
+          
+          <div class="user-section">
+            <span class="user-name">
+              <span>👤</span>
+              {{ session('username', 'User') }}
+            </span>
+            <form method="POST" action="{{ route('logout') }}" style="display: inline;">
+              @csrf
+              <button type="submit" class="logout-btn">
+                <span>🚪</span>
+                <span>Đăng xuất</span>
+              </button>
+            </form>
+          </div>
+        @endif
+      </div>
+    </header>
     <main class="wrap">
       <div class="card">
-        <h2>👨‍👩‍👧 Theo dõi tiến trình học</h2>
+        <h2>📊 Theo dõi tiến trình học</h2>
         <p class="muted">Danh sách bản ghi gần đây.</p>
         <div class="grid">
           @forelse($records as $r)
@@ -26,60 +89,14 @@
           @endforelse
         </div>
       </div>
-      <div class="foot">
-        <a class="btn btn-ghost" href="{{ route('demo.quiz') }}">▶ Chơi demo</a>
-        <a class="btn btn-primary" href="{{ route('community.index') }}">💬 Cộng đồng</a>
-      </div>
+
     </main>
+    @if(session('user_id'))
     <script>
-      (async function ensureName() {
-        try {
-          var name = localStorage.getItem('student_name');
-          if (name) { name = JSON.parse(name); }
-          if (!name || !String(name).trim()) {
-            var params = new URLSearchParams(window.location.search);
-            var kid = params.get('kid') || 'KID-DEMO';
-            var byKid = localStorage.getItem('name_' + kid);
-            if (byKid) { name = JSON.parse(byKid); }
-          }
-          if (!name || !String(name).trim()) {
-            if (window.Swal && typeof window.Swal.fire === 'function') {
-              let valid = false;
-              while (!valid) {
-                const result = await Swal.fire({
-                  title: 'Xin chào! Hãy nhập tên của bạn',
-                  input: 'text',
-                  inputLabel: 'Tên sẽ dùng xuyên suốt quá trình học',
-                  inputPlaceholder: 'VD: Minh Anh',
-                  allowOutsideClick: false,
-                  allowEscapeKey: false,
-                  confirmButtonText: 'Xác nhận',
-                  inputValidator: (value) => {
-                    if (!value || value.trim().length < 2) return 'Tên phải có ít nhất 2 ký tự';
-                    return undefined;
-                  }
-                });
-                if (result && result.value && String(result.value).trim().length >= 2) {
-                  name = String(result.value).trim();
-                  localStorage.setItem('student_name', JSON.stringify(name));
-                  valid = true;
-                }
-              }
-            } else {
-              // Fallback
-              var n = '';
-              while (!n || n.trim().length < 2) {
-                n = prompt('Nhập tên của bạn để bắt đầu:');
-                if (n && n.trim().length >= 2) {
-                  name = n.trim();
-                  localStorage.setItem('student_name', JSON.stringify(name));
-                }
-              }
-            }
-          }
-        } catch(e) {}
-      })();
+      // Không cần localStorage nữa vì đã có user đăng nhập
+      // Display name sẽ được lưu trong database và quản lý qua API
     </script>
+    @endif
   </body>
  </html>
 

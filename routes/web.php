@@ -2,20 +2,40 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DemoController;
-use App\Http\Controllers\ActivationController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
+
+// Welcome page route
+Route::get('/', function () {
+    return view('welcome');
+})->name('welcome');
 
 
 // Demo controller routes
 Route::get('/demo/quiz', [DemoController::class, 'quiz'])->name('demo.quiz');
+Route::get('/quiz', [DemoController::class, 'quiz'])->name('quiz'); // Alias for easier access
 Route::post('/demo/progress', [DemoController::class, 'logProgress'])->name('demo.progress');
-Route::post('/demo/register-name', [DemoController::class, 'registerName'])->name('demo.registerName');
+
 Route::get('/api/lesson', [DemoController::class, 'getLesson'])->name('api.lesson');
 Route::get('/api/points', function() {
     $userId = session('user_id');
+    $username = session('username', '');
     $point = session('point', 0);
-    return response()->json(['userId' => $userId, 'point' => (int) $point]);
+    
+    // Sync điểm từ database để đảm bảo chính xác
+    if ($userId) {
+        $user = App\Models\User::find($userId);
+        if ($user) {
+            $point = (int) $user->point;
+            session(['point' => $point]); // update session
+        }
+    }
+    
+    return response()->json([
+        'userId' => $userId, 
+        'username' => $username,
+        'point' => (int) $point
+    ]);
 })->name('api.points');
 
 Route::post('/api/redeem', function(\Illuminate\Http\Request $request) {
@@ -45,15 +65,40 @@ Route::post('/api/add-points', function(\Illuminate\Http\Request $request) {
     return response()->json(['ok' => true, 'point' => (int) $user->point]);
 })->name('api.addPoints');
 
-// Activation routes
-Route::get('/activate', [ActivationController::class, 'showForm'])->name('activate.form');
-Route::post('/activate', [ActivationController::class, 'activate'])->name('activate.submit');
+Route::post('/api/set-display-name', function(\Illuminate\Http\Request $request) {
+    $userId = session('user_id');
+    if (!$userId) return response()->json(['ok' => false, 'error' => 'Unauthenticated'], 401);
+    
+    $data = $request->validate([
+        'name' => 'required|string|min:2|max:100',
+    ]);
+    
+    $user = App\Models\User::find($userId);
+    if (!$user) return response()->json(['ok' => false, 'error' => 'User not found'], 404);
+    
+    $user->display_name = $data['name'];
+    $user->save();
+    
+    return response()->json(['ok' => true, 'display_name' => $user->display_name]);
+})->name('api.setDisplayName');
+
+Route::get('/api/get-display-name', function() {
+    $userId = session('user_id');
+    if (!$userId) return response()->json(['ok' => false, 'error' => 'Unauthenticated'], 401);
+    
+    $user = App\Models\User::find($userId);
+    if (!$user) return response()->json(['ok' => false, 'error' => 'User not found'], 404);
+    
+    return response()->json(['ok' => true, 'display_name' => $user->display_name]);
+})->name('api.getDisplayName');
+
+
 
 // Parent dashboard
-Route::get('/parent', [DemoController::class, 'parentDashboard'])->name('parent.dashboard');
+Route::get('/parent', [DemoController::class, 'parentDashboard'])->name('parent');
 
 // Community forum
-Route::get('/community', [DemoController::class, 'communityIndex'])->name('community.index');
+Route::get('/community', [DemoController::class, 'communityIndex'])->name('community');
 Route::post('/community', [DemoController::class, 'communityCreate'])->name('community.create');
 Route::post('/community/{id}/comment', [DemoController::class, 'communityComment'])->name('community.comment');
 

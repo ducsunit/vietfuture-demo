@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
-use App\Models\Student;
 use App\Models\Book;
 use App\Models\User;
+use App\Models\ProgressRecord;
+use App\Models\CommunityThread;
+use App\Models\CommunityComment;
 use Illuminate\Http\JsonResponse;
 
 class DemoController extends Controller
@@ -36,22 +38,10 @@ class DemoController extends Controller
             'score' => 'required|integer',
             'age' => 'nullable|string',
             'name' => 'required|string|max:100',
+            'userId' => 'nullable|integer',
         ]);
 
-        $key = 'progress_records';
-        $records = Cache::get($key, []);
-        $records[] = [
-            'id' => (string) Str::uuid(),
-            'kidId' => $data['kidId'],
-            'lesson' => $data['lesson'],
-            'score' => $data['score'],
-            'age' => $data['age'] ?? null,
-            'name' => $data['name'],
-            'created_at' => now()->toDateTimeString(),
-        ];
-        Cache::put($key, $records, now()->addDay());
-
-        // Cộng điểm cho user theo session hoặc theo userId truyền vào
+        // Tìm user từ session hoặc userId
         $targetUser = null;
         if ($request->session()->has('user_id')) {
             $targetUser = User::find($request->session()->get('user_id'));
@@ -59,6 +49,19 @@ class DemoController extends Controller
         if (!$targetUser && $request->filled('userId')) {
             $targetUser = User::find($request->input('userId'));
         }
+
+        // Lưu progress record vào database
+        $progressRecord = ProgressRecord::create([
+            'record_uid' => (string) Str::uuid(),
+            'user_id' => $targetUser ? $targetUser->id : null,
+            'kid_id' => $data['kidId'],
+            'lesson' => $data['lesson'],
+            'score' => $data['score'],
+            'age' => $data['age'] ?? null,
+            'name' => $data['name'],
+        ]);
+
+        // Cộng điểm cho user
         if ($targetUser) {
             $targetUser->point = (int) $targetUser->point + (int) $data['score'];
             $targetUser->save();
@@ -66,36 +69,61 @@ class DemoController extends Controller
                 $request->session()->put('point', (int) $targetUser->point);
             }
         }
-        return response()->json(['ok' => true]);
+
+        return response()->json(['ok' => true, 'record_id' => $progressRecord->id]);
     }
 
-    public function registerName(Request $request)
-    {
-        $data = $request->validate([
-            'kidId' => 'required|string',
-            'name' => 'required|string|max:100',
-            'age' => 'nullable|string',
-        ]);
-        $student = Student::firstOrCreate(['kid_uid' => $data['kidId']]);
-        $student->name = $data['name'];
-        if (isset($data['age'])) $student->age = $data['age'];
-        $student->save();
-        return response()->json(['ok' => true]);
-    }
+
 
     public function parentDashboard()
     {
-        $records = Cache::get('progress_records', []);
-        // Sort desc by created_at
-        usort($records, function ($a, $b) {
-            return strcmp($b['created_at'], $a['created_at']);
-        });
+        // Lấy progress records từ database, sắp xếp theo thời gian mới nhất
+        $records = ProgressRecord::with('user')
+            ->orderBy('created_at', 'desc')
+            ->limit(50) // Giới hạn 50 records gần nhất
+            ->get()
+            ->map(function ($record) {
+                return [
+                    'id' => $record->record_uid,
+                    'kidId' => $record->kid_id,
+                    'name' => $record->name,
+                    'lesson' => $record->lesson,
+                    'score' => $record->score,
+                    'age' => $record->age,
+                    'created_at' => $record->created_at->format('Y-m-d H:i:s'),
+                    'user' => $record->user ? $record->user->username : null,
+                ];
+            });
+
         return view('parent', ['records' => $records]);
     }
 
     public function communityIndex()
     {
-        $threads = Cache::get('community_threads', []);
+        // Lấy threads từ database với comments
+        $threads = CommunityThread::with(['comments', 'user'])
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($thread) {
+                return [
+                    'id' => $thread->thread_uid,
+                    'title' => $thread->title,
+                    'content' => $thread->content,
+                    'author' => $thread->author,
+                    'created_at' => $thread->created_at->format('Y-m-d H:i:s'),
+                    'user' => $thread->user ? $thread->user->username : null,
+                    'comments' => $thread->comments->map(function ($comment) {
+                        return [
+                            'id' => $comment->comment_uid,
+                            'content' => $comment->content,
+                            'author' => $comment->author,
+                            'created_at' => $comment->created_at->format('Y-m-d H:i:s'),
+                            'user' => $comment->user ? $comment->user->username : null,
+                        ];
+                    })->toArray(),
+                ];
+            });
+
         return view('community', ['threads' => $threads]);
     }
 
@@ -106,17 +134,18 @@ class DemoController extends Controller
             'content' => 'required|string|max:5000',
             'author' => 'required|string|max:100',
         ]);
-        $threads = Cache::get('community_threads', []);
-        $thread = [
-            'id' => (string) Str::uuid(),
+
+        $userId = $request->session()->get('user_id');
+
+        // Tạo thread mới trong database
+        CommunityThread::create([
+            'thread_uid' => (string) Str::uuid(),
+            'user_id' => $userId,
             'title' => $data['title'],
             'content' => $data['content'],
             'author' => $data['author'],
-            'created_at' => now()->toDateTimeString(),
-            'comments' => [],
-        ];
-        array_unshift($threads, $thread);
-        Cache::put('community_threads', $threads, now()->addDay());
+        ]);
+
         return redirect()->route('community.index');
     }
 
@@ -126,19 +155,25 @@ class DemoController extends Controller
             'comment' => 'required|string|max:1000',
             'author' => 'required|string|max:100',
         ]);
-        $threads = Cache::get('community_threads', []);
-        foreach ($threads as &$t) {
-            if ($t['id'] === $id) {
-                $t['comments'][] = [
-                    'id' => (string) Str::uuid(),
-                    'content' => $data['comment'],
-                    'author' => $data['author'],
-                    'created_at' => now()->toDateTimeString(),
-                ];
-                break;
-            }
+
+        $userId = $request->session()->get('user_id');
+
+        // Tìm thread theo thread_uid
+        $thread = CommunityThread::where('thread_uid', $id)->first();
+        
+        if (!$thread) {
+            return redirect()->route('community.index')->with('error', 'Thread không tồn tại');
         }
-        Cache::put('community_threads', $threads, now()->addDay());
+
+        // Tạo comment mới
+        CommunityComment::create([
+            'comment_uid' => (string) Str::uuid(),
+            'thread_id' => $thread->id,
+            'user_id' => $userId,
+            'content' => $data['comment'],
+            'author' => $data['author'],
+        ]);
+
         return redirect()->route('community.index');
     }
 

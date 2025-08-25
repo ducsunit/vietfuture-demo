@@ -61,8 +61,9 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        $request->session()->forget(['user_id', 'username']);
-        return redirect()->route('login');
+        $request->session()->forget(['user_id', 'username', 'point']);
+        $request->session()->flush(); // Xóa toàn bộ session
+        return redirect()->route('login')->with('success', 'Đã đăng xuất thành công!');
     }
 }
 

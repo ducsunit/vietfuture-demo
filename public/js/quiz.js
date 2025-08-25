@@ -1,14 +1,11 @@
 const $ = (sel, el = document) => el.querySelector(sel);
 const params = new URLSearchParams(location.search);
-const kidId = (function(){
-  // Ưu tiên phiên sau kích hoạt: nếu server đã gắn session student_id, client sẽ không cần kidId
-  const k = params.get("kid");
-  return k || "";
-})();
+const kidId = params.get("kid") || "";
 const age = "";
 const bookUid = params.get("book") || "";
 const lessonId = params.get("lesson") || "";
 let studentName = '';
+let userId = null;
 let LESSON = null; // dữ liệu bài học lấy từ API
 // Answers must be initialized before any event bindings
 var answers = {};
@@ -18,11 +15,101 @@ const LS = {
   get(k, def) { return def; },
   set(k, v) { /* no-op */ },
 };
-async function ensureName() { /* không còn yêu cầu nhập tên ở client; đã nhập ở bước activate */ }
+
+async function ensureName() {
+  // Lấy thông tin user từ session
+  try {
+    const r = await fetch('/api/points', { headers: { Accept: 'application/json' } });
+    const j = await r.json();
+    if (j.userId) {
+      userId = j.userId;
+      userPoints = j.point || 0;
+      
+      // Lấy display_name từ database
+      try {
+        const nameResponse = await fetch('/api/get-display-name', { 
+          headers: { Accept: 'application/json' } 
+        });
+        if (nameResponse.ok) {
+          const nameData = await nameResponse.json();
+          if (nameData.ok && nameData.display_name) {
+            studentName = nameData.display_name;
+          } else {
+            // Nếu chưa có display_name, yêu cầu người dùng nhập
+            studentName = j.username || `User_${userId}`;
+            await promptForDisplayName();
+          }
+        } else {
+          studentName = j.username || `User_${userId}`;
+        }
+      } catch (nameError) {
+        console.log('Could not get display name:', nameError);
+        studentName = j.username || `User_${userId}`;
+      }
+    }
+  } catch (e) {
+    console.log('Could not get user info:', e);
+  }
+}
+
+async function promptForDisplayName() {
+  if (window.Swal && typeof window.Swal.fire === 'function') {
+    try {
+      const result = await Swal.fire({
+        title: 'Thiết lập tên hiển thị',
+        html: `
+          <p>Hãy nhập tên hiển thị để sử dụng trong quiz và cộng đồng:</p>
+          <input type="text" id="displayNameInput" class="swal2-input" placeholder="VD: Minh Anh" maxlength="100">
+        `,
+        focusConfirm: false,
+        confirmButtonText: 'Lưu tên',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        preConfirm: () => {
+          const name = document.getElementById('displayNameInput').value;
+          if (!name || name.trim().length < 2) {
+            Swal.showValidationMessage('Tên phải có ít nhất 2 ký tự');
+            return false;
+          }
+          return name.trim();
+        }
+      });
+      
+      if (result.isConfirmed && result.value) {
+        await setDisplayName(result.value);
+        studentName = result.value;
+      }
+    } catch (error) {
+      console.log('Error prompting for display name:', error);
+    }
+  }
+}
+
+async function setDisplayName(name) {
+  try {
+    const response = await fetch('/api/set-display-name', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({ name: name })
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log('Display name set successfully:', data.display_name);
+    } else {
+      console.error('Failed to set display name');
+    }
+  } catch (error) {
+    console.error('Error setting display name:', error);
+  }
+}
 
 (async function init() {
   await ensureName();
-  $("#kidTag").textContent = `• Đã kích hoạt •`;
   await loadLesson();
   // lấy điểm từ DB
   try {
@@ -30,6 +117,7 @@ async function ensureName() { /* không còn yêu cầu nhập tên ở client; 
     const j = await r.json();
     if (typeof j.point === 'number') userPoints = j.point;
   } catch (e) {}
+  updateHeaderPoints();
   render();
 })();
 
@@ -93,7 +181,18 @@ function render() {
   const QUIZ = getQuiz();
   const root = $("#view");
   if (!LESSON) {
-    root.innerHTML = `<div class="card"><h2>Không tìm thấy nội dung bài học</h2><p>Vui lòng kiểm tra tham số book/lesson hoặc liên hệ quản trị.</p></div>`;
+    root.innerHTML = `
+    <div class="card">
+      <h2>🔍 Không tìm thấy nội dung bài học</h2>
+      <p style="text-align: center; font-family: 'Fredoka', cursive; color: #667eea; margin: 1rem 0;">
+        🤔 Vui lòng kiểm tra tham số book/lesson hoặc liên hệ quản trị.
+      </p>
+      <div style="text-align: center; margin-top: 2rem;">
+        <a href="${window.location.origin}" class="btn btn-primary">
+          🏠 Về trang chủ
+        </a>
+      </div>
+    </div>`;
     return;
   }
   // derive timer on first render
@@ -102,19 +201,30 @@ function render() {
   if (!q) return renderResult();
   const qType = String(q.type || (q.options ? 'single' : (q.items ? 'order' : ''))).toLowerCase();
   const prog = `Câu ${current + 1}/${QUIZ.questions.length}`;
+  const progressPercent = ((current + 1) / QUIZ.questions.length) * 100;
   root.innerHTML = `
       <div class="card">
-        <div class="progress"><div class="muted">${prog}</div></div>
-        <h2>${QUIZ.title} — ${prog}</h2>
-        <p>${q.text}</p>
+        <div class="quiz-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: ${progressPercent}%"></div>
+          </div>
+          <div class="progress-text">📚 ${prog} • ⏰ ${timeLeft}s</div>
+        </div>
+        <h2>🎯 ${q.text}</h2>
         <div id="zone"></div>
-        <div class="foot">
+        <div class="foot" style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
           <button class="btn btn-ghost" onclick="prevQ()" ${
             current === 0 ? "disabled" : ""
-          }>◀ Trước</button>
-          <button class="btn btn-primary" id="nextBtn">${
-            current === QUIZ.questions.length - 1 ? "Nộp bài ▶" : "Tiếp ▶"
-          }</button>
+          }>
+            <span>◀</span>
+            <span>Câu trước</span>
+          </button>
+          <button class="btn btn-primary" id="nextBtn">
+            ${current === QUIZ.questions.length - 1 ? 
+              '<span>🏁</span> <span>Hoàn thành</span>' : 
+              '<span>Tiếp tục</span> <span>▶</span>'
+            }
+          </button>
         </div>
       </div>`;
   $("#nextBtn").addEventListener("click", nextQ);
@@ -125,8 +235,14 @@ function render() {
 function renderSingle(q) {
   const zone = $("#zone");
   zone.className = "choices";
+  const letters = ['A', 'B', 'C', 'D', 'E', 'F'];
   zone.innerHTML = q.options
-    .map((o) => `<div class="choice" data-id="${o.id}">${o.text}</div>`)
+    .map((o, index) => `
+      <div class="choice" data-id="${o.id}">
+        <div class="choice-letter">${letters[index] || (index + 1)}</div>
+        <div class="choice-text">${o.text}</div>
+      </div>
+    `)
     .join("");
   // Event delegation for reliability
   zone.addEventListener("click", (e) => {
@@ -134,8 +250,18 @@ function renderSingle(q) {
     if (!el || !zone.contains(el)) return;
     selected = el.dataset.id;
     answers[q.id] = selected;
-    zone.querySelectorAll('.choice').forEach((c) => c.setAttribute('aria-selected', 'false'));
+    zone.querySelectorAll('.choice').forEach((c) => {
+      c.setAttribute('aria-selected', 'false');
+      c.classList.remove('selected');
+    });
     el.setAttribute('aria-selected', 'true');
+    el.classList.add('selected');
+    
+    // Add fun click effect
+    el.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+      el.style.transform = '';
+    }, 150);
   });
 }
 
@@ -298,7 +424,7 @@ async function renderResult() {
   html += `<div class='foot' style='justify-content:space-between;'>`;
   html += `<a class='btn btn-ghost' href='#' onclick='location.reload()'>🔄 Làm lại</a>`;
   html += `<div style='display:flex; gap:12px;'>`;
-  html += `<button class='btn btn-ghost' onclick='showCollection()'>📚 Bộ sưu tập</button>`;
+
   html += `<button class='btn btn-primary' onclick='showRewardShop()'>🛍️ Cửa hàng phần quà</button>`;
   html += `</div>`;
   html += `</div></div>`;
@@ -321,7 +447,8 @@ async function renderResult() {
         lesson: lessonId,
         score: earnedPoints, // chỉ gửi điểm vừa kiếm được
         age,
-        name: studentName
+        name: studentName,
+        userId: userId // gửi userId để controller có thể tìm user chính xác
       })
     });
     // đồng bộ điểm từ DB về UI
@@ -460,11 +587,7 @@ function showRewardShop() {
   });
   html += `</div>`;
 
-  // Nút quay lại và xem bộ sưu tập
-  html += `<div class='foot' style='justify-content:space-between;'>`;
-  html += `<button class='btn btn-ghost' onclick='renderResult()'>◀ Quay lại kết quả</button>`;
-  html += `<button class='btn btn-ghost' onclick='showCollection()'>📚 Bộ sưu tập của tôi</button>`;
-  html += `</div>`;
+  // Footer section bỏ các nút không cần thiết
   html += `</div>`;
 
   root.innerHTML = html;
@@ -607,7 +730,7 @@ function showCollection() {
     html += `</div>`;
   }
 
-  // Nút quay lại
+  // Nút quay lại cửa hàng
   html += `<div class='foot'><button class='btn btn-ghost' onclick='showRewardShop()'>◀ Quay lại cửa hàng</button></div>`;
   html += `</div>`;
 
@@ -617,7 +740,13 @@ function showCollection() {
 // Hiển thị điểm trên header
 function updateHeaderPoints() {
   const kidTag = $("#kidTag");
-  kidTag.textContent = `• ID: ${kidId} • Tuổi: ${age} • ${userPoints} điểm`;
+  if (userId && studentName) {
+    kidTag.textContent = `• ${studentName} • ${userPoints} điểm`;
+  } else if (userId) {
+    kidTag.textContent = `• User ${userId} • ${userPoints} điểm`;
+  } else {
+    kidTag.textContent = `• ${userPoints} điểm`;
+  }
 }
 
 window.addEventListener("hashchange", render);

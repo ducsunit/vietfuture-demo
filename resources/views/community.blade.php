@@ -3,14 +3,77 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Cộng đồng kỹ năng sống</title>
+    <title>🌍 Cộng Đồng Kỹ Năng Sống - VietFuture</title>
     <meta name="csrf-token" content="{{ csrf_token() }}" />
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Comic+Neue:wght@300;400;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="{{ asset('css/quiz.css') }}" />
+    <link rel="stylesheet" href="{{ asset('css/navigation.css') }}" />
   </head>
   <body>
+    <header class="header-nav fade-in">
+      <div class="header-container">
+        <div class="logo-section">
+          <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+              <path d="M20 22V8a2 2 0 0 0-2-2h-7l-2-2H6a2 2 0 0 0-2 2v12" />
+            </svg>
+          </div>
+          <h1 class="logo-text">🌍 VietFuture Community</h1>
+        </div>
+        
+        @if(session('user_id'))
+          <nav class="nav-menu">
+            <a href="{{ route('welcome') }}" class="nav-link">
+              <span class="nav-emoji">🏠</span>
+              <span>Trang chủ</span>
+            </a>
+            <a href="{{ route('quiz') }}" class="nav-link">
+              <span class="nav-emoji">🎮</span>
+              <span>Quiz</span>
+            </a>
+            <a href="{{ route('parent') }}" class="nav-link">
+              <span class="nav-emoji">👨‍👩‍👧</span>
+              <span>Dashboard</span>
+            </a>
+            <a href="{{ route('community') }}" class="nav-link active">
+              <span class="nav-emoji">💬</span>
+              <span>Cộng đồng</span>
+            </a>
+            <a href="#" onclick="alert('Cửa hàng chỉ có trong trang Quiz')" class="nav-link disabled">
+              <span class="nav-emoji">🛍️</span>
+              <span>Cửa hàng</span>
+            </a>
+            <a href="#" onclick="alert('Bộ sưu tập chỉ có trong trang Quiz')" class="nav-link disabled">
+              <span class="nav-emoji">📚</span>
+              <span>Bộ sưu tập</span>
+            </a>
+          </nav>
+          
+          <div class="user-section">
+            <span class="user-name">
+              <span>👤</span>
+              {{ session('username', 'User') }}
+            </span>
+            <form method="POST" action="{{ route('logout') }}" style="display: inline;">
+              @csrf
+              <button type="submit" class="logout-btn">
+                <span>🚪</span>
+                <span>Đăng xuất</span>
+              </button>
+            </form>
+          </div>
+        @endif
+      </div>
+    </header>
     <main class="wrap">
       <div class="card">
-        <h2>💬 Chia sẻ cách dạy kỹ năng sống</h2>
+        <h2>✍️ Chia sẻ cách dạy kỹ năng sống</h2>
         <form method="POST" action="{{ route('community.create') }}">
           @csrf
           <div style="display:grid; gap:8px;">
@@ -54,32 +117,57 @@
         @endforelse
       </div>
 
-      <div class="foot">
-        <a class="btn btn-ghost" href="{{ route('demo.quiz') }}">▶ Chơi demo</a>
-        <a class="btn btn-primary" href="{{ route('parent.dashboard') }}">👨‍👩‍👧 Phụ huynh</a>
-      </div>
+
     </main>
+    @if(session('user_id'))
     <script>
-      (function() {
+      // Sử dụng display_name từ database thay vì localStorage
+      (async function() {
         try {
-          var name = localStorage.getItem('student_name');
-          if (name) { name = JSON.parse(name); }
-          if (!name || !String(name).trim()) {
-            var params = new URLSearchParams(window.location.search);
-            var kid = params.get('kid') || 'KID-DEMO';
-            var byKid = localStorage.getItem('name_' + kid);
-            if (byKid) { name = JSON.parse(byKid); }
+          let displayName = '{{ session("username", "User") }}';
+          
+          // Lấy display_name từ database nếu có
+          const response = await fetch('/api/get-display-name', {
+            headers: { 'Accept': 'application/json' }
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            if (data.ok && data.display_name) {
+              displayName = data.display_name;
+            }
           }
-          if (!name || !String(name).trim()) {
-            name = 'Học sinh';
-          }
-          var mainAuthor = document.getElementById('authorField');
-          if (mainAuthor) mainAuthor.value = name;
-          var commentAuthors = document.querySelectorAll('.authorFieldComment');
-          commentAuthors.forEach(function(el){ el.value = name; });
-        } catch(e) {}
+          
+          // Set author fields
+          const mainAuthor = document.getElementById('authorField');
+          if (mainAuthor) mainAuthor.value = displayName;
+          
+          const commentAuthors = document.querySelectorAll('.authorFieldComment');
+          commentAuthors.forEach(function(el) { 
+            el.value = displayName; 
+          });
+          
+        } catch(e) {
+          console.log('Could not get display name:', e);
+          // Fallback sử dụng username
+          const displayName = '{{ session("username", "User") }}';
+          const mainAuthor = document.getElementById('authorField');
+          if (mainAuthor) mainAuthor.value = displayName;
+          const commentAuthors = document.querySelectorAll('.authorFieldComment');
+          commentAuthors.forEach(function(el) { el.value = displayName; });
+        }
       })();
     </script>
+    @else
+    <script>
+      // Guest user - sử dụng tên mặc định
+      const defaultName = 'Khách';
+      const mainAuthor = document.getElementById('authorField');
+      if (mainAuthor) mainAuthor.value = defaultName;
+      const commentAuthors = document.querySelectorAll('.authorFieldComment');
+      commentAuthors.forEach(function(el) { el.value = defaultName; });
+    </script>
+    @endif
   </body>
  </html>
 

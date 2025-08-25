@@ -1,52 +1,129 @@
 @extends('admin.layout')
+@section('title', 'Chỉnh sửa sách')
 @section('content')
-<h2>Sửa sách</h2>
+
+<div class="admin-page-header">
+  <h1 class="admin-page-title">
+    <span>✏️</span>
+    Chỉnh sửa: {{ $book->title }}
+  </h1>
+  <div class="admin-page-actions">
+    <a href="{{ route('admin.books.index') }}" class="admin-btn admin-btn-secondary">
+      <span>◀</span>
+      <span>Quay lại</span>
+    </a>
+  </div>
+</div>
+
+<!-- Progress Indicator -->
+<div class="form-progress">
+  <div class="progress-step completed">
+    <span>📋</span>
+    <span>Thông tin cơ bản</span>
+  </div>
+  <div class="progress-step active">
+    <span>❓</span>
+    <span>Câu hỏi</span>
+  </div>
+  <div class="progress-step">
+    <span>💾</span>
+    <span>Cập nhật</span>
+  </div>
+</div>
+
 @if ($errors->any())
-  <div class="notice" style="color:#dc2626;">{{ $errors->first() }}</div>
+  <div class="admin-alert admin-alert-error">
+    <strong>❌ Có lỗi xảy ra:</strong>
+    <ul style="margin: 0.5rem 0 0 1rem;">
+      @foreach ($errors->all() as $error)
+        <li>{{ $error }}</li>
+      @endforeach
+    </ul>
+  </div>
 @endif
-<form method="POST" action="{{ route('admin.books.update', $book->id) }}" style="display:grid; gap:12px;">
-  @csrf
-  @method('PUT')
-  <input name="book_uid" value="{{ $book->book_uid }}" placeholder="UID sách" required style="padding:10px; border:1px solid #e2e8f0; border-radius:8px;" />
-  <input name="title" value="{{ $book->title }}" placeholder="Tiêu đề" required style="padding:10px; border:1px solid #e2e8f0; border-radius:8px;" />
-  <div class="card">
-    <h3>Thông tin bài học</h3>
-    @php($parsed = $book->content ? json_decode($book->content, true) : null)
-    @php($lesson = $parsed['lessons'][0] ?? null)
-    <input name="lesson_id" value="{{ $lesson['id'] ?? '' }}" placeholder="Lesson ID" style="padding:10px; border:1px solid #e2e8f0; border-radius:8px;" />
-    <input name="lesson_title" value="{{ $lesson['title'] ?? '' }}" placeholder="Tiêu đề bài" style="padding:10px; border:1px solid #e2e8f0; border-radius:8px;" />
-    @php($q0 = ($lesson['questions'][0] ?? null))
-    <div class="grid">
-      <div class="card">
-        <b>Câu hỏi 1 (single)</b>
-        <input name="q[0][id]" value="{{ $q0['id'] ?? '' }}" placeholder="ID câu" style="padding:8px; border:1px solid #e2e8f0; border-radius:8px;" />
-        <input name="q[0][type]" value="{{ $q0['type'] ?? 'single' }}" style="padding:8px; border:1px solid #e2e8f0; border-radius:8px;" />
-        <input name="q[0][text]" value="{{ $q0['text'] ?? '' }}" placeholder="Nội dung câu hỏi" style="padding:8px; border:1px solid #e2e8f0; border-radius:8px;" />
-        @php($opts = $q0['options'] ?? [])
-        <input name="q[0][opt_a]" value="{{ ($opts[0]['text'] ?? '') }}" placeholder="Phương án A" style="padding:8px; border:1px solid #e2e8f0; border-radius:8px;" />
-        <input name="q[0][opt_b]" value="{{ ($opts[1]['text'] ?? '') }}" placeholder="Phương án B" style="padding:8px; border:1px solid #e2e8f0; border-radius:8px;" />
-        <input name="q[0][opt_c]" value="{{ ($opts[2]['text'] ?? '') }}" placeholder="Phương án C" style="padding:8px; border:1px solid #e2e8f0; border-radius:8px;" />
-        <input name="q[0][opt_d]" value="{{ ($opts[3]['text'] ?? '') }}" placeholder="Phương án D" style="padding:8px; border:1px solid #e2e8f0; border-radius:8px;" />
-        @php($correctOpt = collect($opts)->firstWhere('correct', true))
-        <input name="q[0][correct]" value="{{ $correctOpt ? $correctOpt['id'] : '' }}" placeholder="Đáp án đúng (a/b/c/d)" style="padding:8px; border:1px solid #e2e8f0; border-radius:8px;" />
-        <input name="q[0][explain]" value="{{ $q0['explain'] ?? '' }}" placeholder="Giải thích" style="padding:8px; border:1px solid #e2e8f0; border-radius:8px;" />
-      </div>
-      @php($q1 = ($lesson['questions'][1] ?? null))
-      <div class="card">
-        <b>Câu hỏi 2 (order)</b>
-        <input name="q[1][id]" value="{{ $q1['id'] ?? '' }}" placeholder="ID câu" style="padding:8px; border:1px solid #e2e8f0; border-radius:8px;" />
-        <input name="q[1][type]" value="{{ $q1['type'] ?? 'order' }}" style="padding:8px; border:1px solid #e2e8f0; border-radius:8px;" />
-        <input name="q[1][text]" value="{{ $q1['text'] ?? '' }}" placeholder="Nội dung câu hỏi" style="padding:8px; border:1px solid #e2e8f0; border-radius:8px;" />
-        <input name="q[1][items]" value="{{ isset($q1['items']) ? implode(',', $q1['items']) : '' }}" placeholder="Các bước (cách nhau dấu ,)" style="padding:8px; border:1px solid #e2e8f0; border-radius:8px;" />
-        <input name="q[1][answer]" value="{{ isset($q1['answer']) ? implode(',', $q1['answer']) : '' }}" placeholder="Đáp án đúng (cách nhau dấu ,)" style="padding:8px; border:1px solid #e2e8f0; border-radius:8px;" />
+
+@php
+  $parsed = $book->content ? json_decode($book->content, true) : null;
+  $lesson = $parsed['lessons'][0] ?? null;
+  $questions = $lesson['questions'] ?? [];
+@endphp
+
+<div class="admin-form-container edit-form">
+  <form method="POST" action="{{ route('admin.books.update', $book->id) }}" id="bookForm">
+    @csrf
+    @method('PUT')
+    
+    <!-- Basic Information -->
+    <div class="lesson-info-card">
+      <h3>📚 Thông tin sách</h3>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+        <div class="admin-form-group">
+          <label class="admin-form-label" for="book_uid">UID Sách</label>
+          <input type="text" id="book_uid" name="book_uid" class="admin-form-input" 
+                 value="{{ old('book_uid', $book->book_uid) }}" required>
+          <small>Mã định danh duy nhất cho sách</small>
+        </div>
+        
+        <div class="admin-form-group">
+          <label class="admin-form-label" for="title">Tiêu đề sách</label>
+          <input type="text" id="title" name="title" class="admin-form-input" 
+                 value="{{ old('title', $book->title) }}" required>
+        </div>
+        
+        <div class="admin-form-group">
+          <label class="admin-form-label" for="lesson_id">ID Bài học</label>
+          <input type="text" id="lesson_id" name="lesson_id" class="admin-form-input" 
+                 value="{{ old('lesson_id', $lesson['id'] ?? '') }}">
+        </div>
+        
+        <div class="admin-form-group">
+          <label class="admin-form-label" for="lesson_title">Tiêu đề bài học</label>
+          <input type="text" id="lesson_title" name="lesson_title" class="admin-form-input" 
+                 value="{{ old('lesson_title', $lesson['title'] ?? '') }}">
+        </div>
       </div>
     </div>
-  </div>
-  <div class="foot">
-    <a class="btn btn-ghost" href="{{ route('admin.books.index') }}">Hủy</a>
-    <button class="btn btn-primary" type="submit">Cập nhật</button>
-  </div>
-</form>
+    
+    <!-- Questions Section -->
+    <div class="questions-section">
+      <div class="questions-header">
+        <div class="questions-title">
+          <span>❓</span>
+          <span>Quản lý câu hỏi</span>
+          <span style="background: var(--admin-primary)20; color: var(--admin-primary); padding: 0.25rem 0.75rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 600;">{{ count($questions) }} câu hỏi</span>
+        </div>
+        <button type="button" id="addQuestionBtn" class="add-question-btn">
+          <span>➕</span>
+          <span>Thêm câu hỏi</span>
+        </button>
+      </div>
+      
+      <div id="questionsContainer" class="questions-container">
+        @forelse($questions as $index => $question)
+          @include('admin.books.partials.question-edit', ['question' => $question, 'index' => $index])
+        @empty
+          @include('admin.books.partials.question-empty')
+        @endforelse
+      </div>
+    </div>
+    
+    <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--admin-border);">
+      <a href="{{ route('admin.books.index') }}" class="admin-btn admin-btn-secondary">
+        <span>❌</span>
+        <span>Hủy bỏ</span>
+      </a>
+      <button type="submit" class="admin-btn admin-btn-primary">
+        <span>💾</span>
+        <span>Cập nhật sách</span>
+      </button>
+    </div>
+  </form>
+</div>
+
+<script>
+let questionCount = {{ count($questions) ?: 1 }};
+</script>
+<script src="{{ asset('js/admin-questions.js') }}"></script>
+
 @endsection
-
-
