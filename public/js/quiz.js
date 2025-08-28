@@ -1162,10 +1162,10 @@ async function showCollection() {
             html += `<h3 style='margin:24px 0 16px 0; color:#374151;'>🎨 Stickers của bạn</h3>`;
             html += `<div style='display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:16px; margin-bottom:32px;'>`;
             userOwnedRewards.sticker.forEach((sticker) => {
-                html += `<div style='border:2px solid #10b981; border-radius:12px; padding:16px; background:#ecfdf5; text-align:center;'>`;
-                html += `<div style='font-size:32px; margin-bottom:8px;'>${sticker.emoji}</div>`;
+                html += `<div style='border:2px solid #10b981; border-radius:12px; padding:16px; background:#ecfdf5; text-align:center; display:flex; flex-direction:column; min-height:260px;'>`;
+                html += `<div style='font-size:36px; min-height:48px; display:flex; align-items:center; justify-content:center; margin-bottom:8px;'>${sticker.emoji}</div>`;
                 html += `<div style='font-weight:600; color:#059669;'>${sticker.name}</div>`;
-                html += `<div style='font-size:12px; color:#6b7280; margin-top:4px;'>Mua ngày ${new Date(
+                html += `<div style='font-size:12px; color:#6b7280; margin-top:auto;'>Mua ngày ${new Date(
                     sticker.purchased_at
                 ).toLocaleDateString("vi-VN")}</div>`;
                 html += `</div>`;
@@ -1176,18 +1176,18 @@ async function showCollection() {
         // Phần Badges đã sở hữu
         if (userOwnedRewards.badge && userOwnedRewards.badge.length > 0) {
             html += `<h3 style='margin:24px 0 16px 0; color:#374151;'>🏅 Huy hiệu của bạn</h3>`;
-            html += `<div style='display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:16px; margin-bottom:32px;'>`;
+            html += `<div style='display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-bottom:32px; align-items:stretch;'>`;
             userOwnedRewards.badge.forEach((badge) => {
-                html += `<div style='border:2px solid #f59e0b; border-radius:12px; padding:16px; background:#fffbeb; text-align:center;'>`;
-                html += `<div style='font-size:32px; margin-bottom:8px;'>${badge.emoji}</div>`;
+                html += `<div style='border:2px solid #f59e0b; border-radius:12px; padding:16px; background:#fffbeb; text-align:center; display:flex; flex-direction:column; min-height:260px;'>`;
+                html += `<div style='font-size:36px; min-height:48px; display:flex; align-items:center; justify-content:center; margin-bottom:8px;'>${badge.emoji}</div>`;
                 html += `<div style='font-weight:600; color:#d97706;'>${badge.name}</div>`;
                 if (badge.is_equipped) {
                     html += `<div style='color:#059669; font-weight:600; margin:8px 0;'>✅ Đang sử dụng</div>`;
-                    html += `<button class='btn btn-secondary' style='width:100%;' onclick='unequipBadge("${badge.id}")'>Gỡ huy hiệu</button>`;
+                    html += `<button class='btn btn-secondary' style='width:100%; margin-top:auto;' onclick='unequipBadge("${badge.id}")'>Gỡ huy hiệu</button>`;
                 } else {
-                    html += `<button class='btn btn-primary' style='width:100%; margin-top:8px;' onclick='equipBadge("${badge.id}")'>Trang bị</button>`;
+                    html += `<button class='btn btn-primary' style='width:100%; margin-top:auto;' onclick='equipBadge("${badge.id}")'>Trang bị</button>`;
                 }
-                html += `<div style='font-size:12px; color:#6b7280; margin-top:8px;'>Mua ngày ${new Date(
+                html += `<div style='font-size:12px; color:#6b7280; margin-top:auto;'>Mua ngày ${new Date(
                     badge.purchased_at
                 ).toLocaleDateString("vi-VN")}</div>`;
                 html += `</div>`;
@@ -1201,18 +1201,18 @@ async function showCollection() {
             userOwnedRewards.background.length > 0
         ) {
             html += `<h3 style='margin:24px 0 16px 0; color:#374151;'>🎨 Nền giao diện của bạn</h3>`;
-            html += `<div style='display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:16px; margin-bottom:32px;'>`;
+            html += `<div style='display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-bottom:32px; align-items:stretch;'>`;
             userOwnedRewards.background.forEach((bg) => {
-                html += `<div style='border:2px solid #8b5cf6; border-radius:12px; padding:16px; background:#f3f4f6; text-align:center;'>`;
-                html += `<div style='font-size:32px; margin-bottom:8px;'>${bg.emoji}</div>`;
+                html += `<div style='border:2px solid #8b5cf6; border-radius:12px; padding:16px; background:#f3f4f6; text-align:center; display:flex; flex-direction:column; min-height:260px;'>`;
+                html += `<div style='font-size:36px; min-height:48px; display:flex; align-items:center; justify-content:center; margin-bottom:8px;'>${bg.emoji}</div>`;
                 html += `<div style='font-weight:600; color:#7c3aed; margin-bottom:8px;'>${bg.name}</div>`;
                 if (bg.is_equipped) {
                     html += `<div style='color:#059669; font-weight:600; margin-bottom:8px;'>✅ Đang sử dụng</div>`;
-                    html += `<button class='btn btn-secondary' style='width:100%;' onclick='unequipBackground("${bg.id}")'>Gỡ bỏ</button>`;
+                    html += `<button class='btn btn-secondary' style='width:100%; margin-top:auto;' onclick='unequipBackground("${bg.id}")'>Gỡ bỏ</button>`;
                 } else {
-                    html += `<button class='btn btn-primary' style='width:100%;' onclick='equipBackground("${bg.id}")'>Trang bị</button>`;
+                    html += `<button class='btn btn-primary' style='width:100%; margin-top:auto;' onclick='equipBackground("${bg.id}")'>Trang bị</button>`;
                 }
-                html += `<div style='font-size:12px; color:#6b7280; margin-top:8px;'>Mua ngày ${new Date(
+                html += `<div style='font-size:12px; color:#6b7280; margin-top:auto;'>Mua ngày ${new Date(
                     bg.purchased_at
                 ).toLocaleDateString("vi-VN")}</div>`;
                 html += `</div>`;

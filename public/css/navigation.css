@@ -43,7 +43,7 @@
     width: 48px;
     height: 48px;
     padding: 8px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #00a9ff 0%, #89cff3 100%);
     border-radius: 16px;
     display: flex;
     align-items: center;
@@ -80,7 +80,7 @@
     color: #1e293b;
     margin: 0;
     letter-spacing: -0.02em;
-    background: linear-gradient(135deg, #1e293b 0%, #4a5568 100%);
+    background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -180,10 +180,10 @@
 
 .nav-link.active {
     color: white;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border: 1px solid rgba(102, 126, 234, 0.5);
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.25),
-        0 4px 10px rgba(102, 126, 234, 0.15),
+    background: linear-gradient(135deg, #00a9ff 0%, #89cff3 100%);
+    border: 1px solid rgba(0, 169, 255, 0.5);
+    box-shadow: 0 8px 20px rgba(0, 169, 255, 0.25),
+        0 4px 10px rgba(0, 169, 255, 0.15),
         inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 

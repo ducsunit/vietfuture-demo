@@ -22,7 +22,7 @@
         /* Enhanced Kid-Friendly Styles for Quiz */
         body {
             font-family: 'Fredoka', 'Comic Neue', 'Inter', cursive;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #00a9ff 0%, #a0e9ff 50%, #cdf5fd 100%);
             min-height: 100vh;
             position: relative;
             overflow-x: hidden;
@@ -98,14 +98,14 @@
         .header-nav {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(15px);
-            border-bottom: 3px solid #ff6b6b;
-            box-shadow: 0 8px 32px rgba(255, 107, 107, 0.3);
+            border-bottom: 3px solid #00a9ff;
+            box-shadow: 0 8px 32px rgba(0, 169, 255, 0.25);
             position: relative;
             z-index: 10;
         }
 
         .logo-text {
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #f9ca24);
+            background: linear-gradient(45deg, #00a9ff, #89cff3, #a0e9ff, #cdf5fd);
             background-size: 300% 300%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -141,10 +141,10 @@
 
         .nav-link:hover,
         .nav-link.active {
-            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+            background: linear-gradient(135deg, #00a9ff, #89cff3);
             color: white;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 169, 255, 0.25);
         }
 
         .nav-emoji {

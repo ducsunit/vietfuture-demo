@@ -17,6 +17,10 @@
     <link rel="stylesheet" href="{{ asset('css/navigation.css') }}" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
+        body {
+            background: linear-gradient(135deg, #00a9ff 0%, #a0e9ff 50%, #cdf5fd 100%);
+        }
+
         .dash-wrap {
             padding: 24px;
         }
@@ -72,9 +76,9 @@
         }
 
         .chip.active {
-            border-color: #667eea;
-            color: #4338ca;
-            background: #eef2ff;
+            border-color: #00a9ff;
+            color: #0369a1;
+            background: #e6f7ff;
         }
 
         .record-card {
@@ -98,10 +102,10 @@
             gap: 6px;
             padding: 6px 10px;
             border-radius: 999px;
-            background: #eff6ff;
-            color: #1d4ed8;
+            background: #e6f7ff;
+            color: #0369a1;
             font-size: 12px;
-            border: 1px solid #bfdbfe;
+            border: 1px solid #bae6fd;
         }
 
         .muted-sm {
