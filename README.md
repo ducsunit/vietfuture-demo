@@ -1,61 +1,130 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+## VietFuture Demo (Laravel)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Dự án demo xây dựng bằng Laravel, sử dụng SQLite để phát triển nhanh, kèm sẵn migrations và seeders (sách, nội dung, phần thưởng…).
 
-## About Laravel
+### Yêu cầu hệ thống
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+-   PHP 8.2+ (khuyến nghị cùng bản với `laravel/framework` trong `composer.json`)
+-   Composer 2+
+-   Node.js 18+ và npm/yarn (để build asset với Vite)
+-   SQLite3 (đi kèm hầu hết hệ điều hành)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Cài đặt
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+1. Cài dependency PHP
 
-## Learning Laravel
+```bash
+composer install
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+2. Cài dependency front-end
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+```bash
+npm install
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+3. Tạo file môi trường
 
-## Laravel Sponsors
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Cấu hình cơ sở dữ liệu (SQLite)
 
-### Premium Partners
+Mặc định repo đã có file `database/database.sqlite` rỗng. Đảm bảo `.env` trỏ đúng tới SQLite:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```env
+DB_CONNECTION=sqlite
+DB_DATABASE="${BASE_PATH}/database/database.sqlite"
+```
 
-## Contributing
+Lưu ý Windows: nếu biến trên không hoạt động, dùng đường dẫn tuyệt đối:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```env
+DB_CONNECTION=sqlite
+DB_DATABASE=D:/vietfuture_demo/vietfuture-demo/database/database.sqlite
+```
 
-## Code of Conduct
+### Khởi tạo dữ liệu
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Chạy migrations và seeders:
 
-## Security Vulnerabilities
+```bash
+php artisan migrate --force
+php artisan db:seed --force
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Seeders bao gồm: `BookContentSeeder`, `RewardSeeder`, v.v…
 
-## License
+Nếu cần làm mới dữ liệu nhanh:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+php artisan migrate:fresh --seed --force
+```
+
+### Chạy ứng dụng
+
+Chạy server PHP:
+
+```bash
+php artisan serve
+```
+
+Build assets và chạy Vite (chế độ dev với HMR):
+
+```bash
+npm run dev
+```
+
+Build production:
+
+```bash
+npm run build
+```
+
+### Liên kết storage (nếu cần upload/lưu file)
+
+```bash
+php artisan storage:link
+```
+
+### Lệnh Artisan hữu ích
+
+-   `php artisan migrate` / `migrate:fresh --seed`
+-   `php artisan tinker`
+-   `php artisan route:list | cat` (trên Windows PowerShell có thể bỏ `| cat`)
+
+### Kiểm thử
+
+```bash
+php artisan test
+```
+
+Hoặc dùng PHPUnit trực tiếp:
+
+```bash
+vendor/bin/phpunit
+```
+
+### Gỡ lỗi nhanh (Windows)
+
+-   Quyền ghi SQLite: đảm bảo quyền ghi thư mục `database/` và file `database.sqlite`.
+-   Xóa cache cấu hình: `php artisan config:clear && php artisan cache:clear && php artisan route:clear && php artisan view:clear`.
+-   Vite không tải CSS/JS: chạy `npm run dev` và reload trang; kiểm tra `VITE_*` trong `.env` nếu đã tùy chỉnh host/port.
+
+### Cấu trúc chính
+
+-   `app/Http/Controllers`: Controllers (ví dụ `AdminController`, `DemoController`)
+-   `app/Models`: Eloquent Models (`Book`, `User`, `Reward`, …)
+-   `database/migrations`: Migrations (bảng books, users, sessions, progress_records, community_threads, …)
+-   `database/seeders`: Seeders (`DatabaseSeeder`, `BookContentSeeder`, `RewardSeeder`)
+-   `resources/views`: Blade templates (admin, auth, community, quiz, …)
+-   `public/`: asset công khai
+
+### Góp ý/Phát triển thêm
+
+-   Tạo nhánh mới từ `main`, mở Pull Request.
+-   Tuân thủ chuẩn code PHP (Pint): `vendor/bin/pint`.
+
+Chúc bạn chạy dự án vui vẻ!
