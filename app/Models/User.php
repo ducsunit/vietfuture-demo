@@ -36,6 +36,47 @@ class User extends Model
     {
         return $this->hasMany(CommunityComment::class);
     }
+
+    public function userRewards()
+    {
+        return $this->hasMany(UserReward::class);
+    }
+
+    public function rewards()
+    {
+        return $this->belongsToMany(Reward::class, 'user_rewards')->withTimestamps();
+    }
+
+    // Helper methods for rewards
+    public function hasReward($rewardId)
+    {
+        return $this->userRewards()->whereHas('reward', function ($q) use ($rewardId) {
+            $q->where('reward_id', $rewardId);
+        })->exists();
+    }
+
+    public function getEquippedBackground()
+    {
+        return $this->userRewards()
+            ->equipped()
+            ->byType(Reward::TYPE_BACKGROUND)
+            ->with('reward')
+            ->first();
+    }
+
+    public function canAffordReward($points)
+    {
+        return $this->point >= $points;
+    }
+
+    public function spendPoints($amount)
+    {
+        if ($this->point >= $amount) {
+            $this->decrement('point', $amount);
+            return true;
+        }
+        return false;
+    }
 }
 
 // Removed duplicated class from Breeze/Starter stub

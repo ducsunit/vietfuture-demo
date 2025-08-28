@@ -146,7 +146,7 @@ class DemoController extends Controller
             'author' => $data['author'],
         ]);
 
-        return redirect()->route('community.index');
+        return redirect()->route('community');
     }
 
     public function communityComment(Request $request, string $id)
@@ -160,9 +160,9 @@ class DemoController extends Controller
 
         // Tìm thread theo thread_uid
         $thread = CommunityThread::where('thread_uid', $id)->first();
-        
+
         if (!$thread) {
-            return redirect()->route('community.index')->with('error', 'Thread không tồn tại');
+            return redirect()->route('community')->with('error', 'Thread không tồn tại');
         }
 
         // Tạo comment mới
@@ -174,26 +174,48 @@ class DemoController extends Controller
             'author' => $data['author'],
         ]);
 
-        return redirect()->route('community.index');
+        return redirect()->route('community');
     }
 
     public function getLesson(Request $request): JsonResponse
     {
         $bookUid = $request->query('book');
         $lessonId = $request->query('lesson');
-        $book = Book::where('book_uid', $bookUid)->firstOrFail();
+
+        // Kiểm tra tham số đầu vào
+        if (!$bookUid || !$lessonId) {
+            return response()->json([
+                'book' => null,
+                'lesson' => null,
+                'error' => 'Missing book or lesson parameter'
+            ], 400);
+        }
+
+        // Tìm book với error handling
+        $book = Book::where('book_uid', $bookUid)->first();
+        if (!$book) {
+            return response()->json([
+                'book' => null,
+                'lesson' => null,
+                'error' => 'Book not found'
+            ], 404);
+        }
+
         $content = $book->content ? json_decode($book->content, true) : [];
         $lesson = null;
+
         if (isset($content['lessons']) && is_array($content['lessons'])) {
             foreach ($content['lessons'] as $ls) {
-                if ((string)($ls['id'] ?? '') === (string)$lessonId) { $lesson = $ls; break; }
+                if ((string)($ls['id'] ?? '') === (string)$lessonId) {
+                    $lesson = $ls;
+                    break;
+                }
             }
         }
+
         return response()->json([
-            'book' => [ 'uid' => $book->book_uid, 'title' => $book->title ],
+            'book' => ['uid' => $book->book_uid, 'title' => $book->title],
             'lesson' => $lesson,
         ]);
     }
 }
-
-

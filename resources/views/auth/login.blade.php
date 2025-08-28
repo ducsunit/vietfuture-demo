@@ -53,23 +53,30 @@
         position: relative;
         z-index: 1;
         width: 100%;
-        max-width: 450px;
+        max-width: 420px;
         padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
       }
       
       /* Main Login Card */
       .login-card {
-        background: rgba(255, 255, 255, 0.95);
+        background: rgba(255, 255, 255, 0.98);
         backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 24px;
-        padding: 3rem;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 32px;
+        padding: 2.5rem 2rem;
         box-shadow: 
-          0 25px 50px -12px rgba(0, 0, 0, 0.25),
-          0 0 0 1px rgba(255, 255, 255, 0.05);
+          0 20px 40px -8px rgba(0, 0, 0, 0.15),
+          0 0 0 1px rgba(255, 255, 255, 0.1),
+          inset 0 1px 0 rgba(255, 255, 255, 0.2);
         transform: translateY(0);
-        transition: all 0.3s ease;
-        animation: slideUp 0.6s ease-out;
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        animation: slideUp 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+        width: 100%;
+        margin: 2rem 0;
       }
       
       @keyframes slideUp {
@@ -84,50 +91,83 @@
       }
       
       .login-card:hover {
-        transform: translateY(-5px);
+        transform: translateY(-3px);
         box-shadow: 
-          0 35px 60px -12px rgba(0, 0, 0, 0.3),
-          0 0 0 1px rgba(255, 255, 255, 0.1);
+          0 25px 50px -8px rgba(0, 0, 0, 0.2),
+          0 0 0 1px rgba(255, 255, 255, 0.15),
+          inset 0 1px 0 rgba(255, 255, 255, 0.3);
       }
       
       /* Header Section */
       .login-header {
         text-align: center;
-        margin-bottom: 2.5rem;
+        margin-bottom: 2rem;
       }
       
       .login-icon {
-        width: 64px;
-        height: 64px;
+        width: 80px;
+        height: 80px;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 20px;
+        border-radius: 24px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 1.5rem;
-        font-size: 1.75rem;
-        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
-        animation: pulse 2s ease-in-out infinite;
+        margin: 0 auto 1.25rem;
+        font-size: 2rem;
+        box-shadow: 
+          0 12px 28px rgba(102, 126, 234, 0.25),
+          inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        animation: iconFloat 3s ease-in-out infinite;
+        position: relative;
+        overflow: hidden;
       }
       
-      @keyframes pulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.05); }
+      .login-icon::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        animation: iconShimmer 3s ease-in-out infinite;
+      }
+      
+      @keyframes iconFloat {
+        0%, 100% { 
+          transform: translateY(0) rotate(0deg); 
+          box-shadow: 0 12px 28px rgba(102, 126, 234, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+        50% { 
+          transform: translateY(-4px) rotate(1deg); 
+          box-shadow: 0 16px 32px rgba(102, 126, 234, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+      }
+      
+      @keyframes iconShimmer {
+        0% { left: -100%; }
+        50% { left: -100%; }
+        100% { left: 100%; }
       }
       
       .login-title {
-        font-size: 1.875rem;
+        font-size: 2rem;
         font-weight: 700;
         color: #1a202c;
-        margin: 0 0 0.5rem;
+        margin: 0 0 0.75rem;
         letter-spacing: -0.02em;
+        background: linear-gradient(135deg, #1a202c 0%, #4a5568 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
       }
       
       .login-subtitle {
-        font-size: 1rem;
+        font-size: 1.125rem;
         color: #64748b;
         margin: 0;
-        font-weight: 400;
+        font-weight: 500;
+        line-height: 1.5;
       }
       
       /* Alert Messages */
@@ -163,7 +203,7 @@
       /* Form Styling */
       .login-form {
         display: grid;
-        gap: 2rem;
+        gap: 1.5rem;
       }
       
       .form-group {
@@ -172,25 +212,33 @@
       
       .form-input {
         width: 100%;
-        padding: 1rem 1.25rem;
+        padding: 1.125rem 1.5rem;
         font-family: 'Fredoka', 'Inter', sans-serif;
         font-size: 1rem;
         font-weight: 500;
         line-height: 1.5;
         color: #1a202c;
-        background: white;
-        border: 2px solid #e2e8f0;
-        border-radius: 16px;
-        transition: all 0.2s ease;
+        background: rgba(255, 255, 255, 0.95);
+        border: 2px solid rgba(226, 232, 240, 0.8);
+        border-radius: 20px;
+        transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
         box-sizing: border-box;
         font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+        backdrop-filter: blur(10px);
+        box-shadow: 
+          0 2px 8px rgba(0, 0, 0, 0.04),
+          inset 0 1px 0 rgba(255, 255, 255, 0.5);
       }
       
       .form-input:focus {
         outline: none;
         border-color: #667eea;
-        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-        transform: translateY(-2px);
+        background: rgba(255, 255, 255, 1);
+        box-shadow: 
+          0 0 0 4px rgba(102, 126, 234, 0.12),
+          0 4px 16px rgba(102, 126, 234, 0.08),
+          inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        transform: translateY(-1px);
       }
       
       .form-input::placeholder {
@@ -198,74 +246,70 @@
         font-weight: 400;
       }
       
-      /* Input Icons */
+      /* Simplified Input - Remove icons for better alignment */
       .form-group-with-icon {
         position: relative;
         margin-bottom: 0.5rem;
       }
       
-      .form-group-with-icon::before {
-        content: attr(data-icon);
-        position: absolute;
-        left: 1rem;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 1.125rem;
-        color: #94a3b8;
-        z-index: 1;
-        pointer-events: none;
-      }
-      
       .form-group-with-icon .form-input {
-        padding-left: 3rem;
+        padding-left: 1.5rem;
       }
       
       /* Balance Placeholder for Visual Consistency with Register */
       .balance-placeholder {
-        padding: 1rem 1.25rem;
-        border: 2px dashed #e2e8f0;
-        border-radius: 16px;
+        padding: 1.125rem 1.5rem;
+        border: 2px dashed rgba(102, 126, 234, 0.3);
+        border-radius: 20px;
         text-align: center;
         color: #667eea;
-        font-size: 0.875rem;
-        background: rgba(102, 126, 234, 0.05);
+        font-size: 0.95rem;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 0.5rem;
-        min-height: 60px;
+        gap: 0.75rem;
+        min-height: 64px;
         font-weight: 500;
-        animation: gentle-pulse 3s ease-in-out infinite;
+        animation: gentle-pulse 4s ease-in-out infinite;
+        backdrop-filter: blur(10px);
+        box-shadow: 
+          0 2px 8px rgba(102, 126, 234, 0.08),
+          inset 0 1px 0 rgba(255, 255, 255, 0.3);
       }
       
       @keyframes gentle-pulse {
         0%, 100% { 
-          background: rgba(102, 126, 234, 0.05);
-          border-color: #e2e8f0;
+          background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+          border-color: rgba(102, 126, 234, 0.3);
+          box-shadow: 0 2px 8px rgba(102, 126, 234, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.3);
         }
         50% { 
-          background: rgba(102, 126, 234, 0.1);
-          border-color: #667eea;
+          background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+          border-color: rgba(102, 126, 234, 0.4);
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.4);
         }
       }
       
       /* Submit Button */
       .login-btn {
         width: 100%;
-        padding: 1rem 1.5rem;
+        padding: 1.25rem 2rem;
         font-family: 'Fredoka', 'Inter', sans-serif;
-        font-size: 1rem;
+        font-size: 1.125rem;
         font-weight: 600;
         color: white;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         border: none;
-        border-radius: 16px;
+        border-radius: 20px;
         cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        box-shadow: 
+          0 12px 28px rgba(102, 126, 234, 0.25),
+          inset 0 1px 0 rgba(255, 255, 255, 0.2);
         position: relative;
         overflow: hidden;
-        margin-top: 1rem;
+        margin-top: 1.5rem;
       }
       
       .login-btn::before {
@@ -280,8 +324,10 @@
       }
       
       .login-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        transform: translateY(-3px);
+        box-shadow: 
+          0 16px 32px rgba(102, 126, 234, 0.3),
+          inset 0 1px 0 rgba(255, 255, 255, 0.3);
       }
       
       .login-btn:hover::before {
@@ -289,48 +335,56 @@
       }
       
       .login-btn:active {
-        transform: translateY(0);
+        transform: translateY(-1px);
       }
       
       /* Footer Link */
       .login-footer {
         text-align: center;
-        margin-top: 2.5rem;
-        padding-top: 2rem;
-        border-top: 1px solid #e2e8f0;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(226, 232, 240, 0.6);
       }
       
       .register-link {
         display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.75rem;
         color: #667eea;
         text-decoration: none;
         font-weight: 500;
-        font-size: 0.875rem;
-        transition: all 0.2s ease;
-        padding: 0.75rem 1.5rem;
-        border-radius: 12px;
-        background: rgba(102, 126, 234, 0.05);
-        border: 1px solid rgba(102, 126, 234, 0.1);
+        font-size: 1rem;
+        transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        padding: 1rem 1.75rem;
+        border-radius: 16px;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        border: 1px solid rgba(102, 126, 234, 0.15);
+        backdrop-filter: blur(10px);
+        box-shadow: 
+          0 2px 8px rgba(102, 126, 234, 0.08),
+          inset 0 1px 0 rgba(255, 255, 255, 0.3);
       }
       
       .register-link:hover {
-        background: rgba(102, 126, 234, 0.1);
-        transform: translateY(-1px);
-        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+        transform: translateY(-2px);
+        box-shadow: 
+          0 8px 20px rgba(102, 126, 234, 0.15),
+          inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        border-color: rgba(102, 126, 234, 0.25);
       }
       
-      /* Form Field Spacing - Same as Register */
+      /* Form Field Spacing - Optimized */
       .form-fields-container {
         display: grid;
-        gap: 1.75rem;
-        margin-bottom: 1.5rem;
+        gap: 1.5rem;
+        margin-bottom: 1rem;
       }
       
       .form-field-wrapper {
         display: grid;
-        gap: 0.75rem;
+        gap: 0.5rem;
+        position: relative;
       }
       
       /* Responsive Design */
@@ -339,37 +393,70 @@
           padding: 1rem;
         }
         
+        .login-container {
+          max-width: 100%;
+          padding: 0 1rem;
+        }
+        
         .login-card {
           padding: 2rem 1.5rem;
-          border-radius: 20px;
+          border-radius: 28px;
+          margin: 1rem 0;
+        }
+        
+        .login-icon {
+          width: 72px;
+          height: 72px;
+          font-size: 1.875rem;
+        }
+        
+        .login-title {
+          font-size: 1.75rem;
+        }
+        
+        .login-subtitle {
+          font-size: 1rem;
+        }
+        
+        .form-input,
+        .login-btn {
+          padding: 1rem 1.25rem;
+          font-size: 1rem;
+          border-radius: 18px;
+        }
+        
+        .form-group-with-icon .form-input {
+          padding-left: 1.25rem;
+        }
+        
+        .form-fields-container {
+          gap: 1.25rem;
+        }
+        
+        .register-link {
+          padding: 0.875rem 1.5rem;
+          font-size: 0.9375rem;
+        }
+      }
+      
+      @media (max-width: 360px) {
+        .login-card {
+          padding: 1.75rem 1.25rem;
+          border-radius: 24px;
+        }
+        
+        .login-icon {
+          width: 64px;
+          height: 64px;
+          font-size: 1.75rem;
         }
         
         .login-title {
           font-size: 1.5rem;
         }
         
-        .form-input,
-        .login-btn {
-          padding: 0.875rem 1rem;
-          font-size: 0.9375rem;
-        }
-        
-        .form-group-with-icon .form-input {
-          padding-left: 2.75rem;
-        }
-        
         .form-fields-container {
-          gap: 1.5rem;
-        }
-      }
-      
-      @media (max-width: 360px) {
-        .login-card {
-          padding: 1.5rem 1rem;
-        }
-        
-        .form-fields-container {
-          gap: 1.25rem;
+          gap: 1rem;
         }
       }
     </style>
@@ -409,12 +496,12 @@
           
           <div class="form-fields-container">
             <div class="form-field-wrapper">
-              <div class="form-group-with-icon" data-icon="👤">
+              <div class="form-group-with-icon">
                 <input 
                   type="text" 
                   name="username" 
                   class="form-input"
-                  placeholder="Tên đăng nhập" 
+                  placeholder="👤 Tên đăng nhập" 
                   value="{{ old('username') }}"
                   required 
                   autocomplete="username"
@@ -423,12 +510,12 @@
             </div>
             
             <div class="form-field-wrapper">
-              <div class="form-group-with-icon" data-icon="🔒">
+              <div class="form-group-with-icon">
                 <input 
                   type="password" 
                   name="password" 
                   class="form-input"
-                  placeholder="Mật khẩu" 
+                  placeholder="🔒 Mật khẩu" 
                   required 
                   autocomplete="current-password"
                 />

@@ -109,6 +109,11 @@
         border-radius: 15px;
         transition: all 0.3s ease;
         border: 2px solid transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 16px;
       }
       
       .nav-link:hover,
@@ -120,14 +125,19 @@
       }
       
       .nav-emoji {
-        font-size: 1.2rem;
-        animation: bounce 2s infinite;
+        font-size: 1.25rem;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        animation: gentleBounce 3s ease-in-out infinite;
       }
       
-      @keyframes bounce {
-        0%, 20%, 50%, 80%, 100% { transform: scale(1); }
-        40% { transform: scale(1.2); }
-        60% { transform: scale(1.1); }
+      @keyframes gentleBounce {
+        0%, 100% { transform: translateY(0) scale(1); }
+        50% { transform: translateY(-2px) scale(1.05); }
       }
       
       /* Quiz Content Area */
@@ -444,6 +454,43 @@
         25% { transform: translateX(-5px); }
         75% { transform: translateX(5px); }
       }
+      
+      /* Mobile Navigation Improvements */
+      @media (max-width: 768px) {
+        .nav-link {
+          padding: 10px 12px;
+          gap: 6px;
+          border-radius: 12px;
+        }
+        
+        .nav-emoji {
+          font-size: 1.125rem;
+          width: 18px;
+          height: 18px;
+        }
+        
+        .nav-link span:not(.nav-emoji) {
+          font-size: 13px;
+        }
+      }
+      
+      @media (max-width: 480px) {
+        .nav-link {
+          padding: 8px 10px;
+          gap: 4px;
+          min-height: 44px; /* Touch target size */
+        }
+        
+        .nav-emoji {
+          font-size: 1rem;
+          width: 16px;
+          height: 16px;
+        }
+        
+        .nav-link span:not(.nav-emoji) {
+          font-size: 12px;
+        }
+      }
     </style>
   </head>
   <body>
@@ -470,7 +517,7 @@
         
         @if(session('user_id'))
           <nav class="nav-menu">
-            <a href="{{ route('welcome') }}" class="nav-link">
+            <a href="{{ route('login', ['book' => 'phong-chong-duoi-nuoc', 'lesson' => 'an-toan-nuoc']) }}" class="nav-link">
               <span class="nav-emoji">🏠</span>
               <span>Trang chủ</span>
             </a>
@@ -511,7 +558,7 @@
           </div>
         @else
           <nav class="nav-menu">
-            <a href="{{ route('welcome') }}" class="nav-link">
+            <a href="{{ route('login', ['book' => 'phong-chong-duoi-nuoc', 'lesson' => 'an-toan-nuoc']) }}" class="nav-link">
               <span class="nav-emoji">🏠</span>
               <span>Trang chủ</span>
             </a>

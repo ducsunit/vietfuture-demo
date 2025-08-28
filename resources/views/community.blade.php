@@ -29,7 +29,7 @@
         
         @if(session('user_id'))
           <nav class="nav-menu">
-            <a href="{{ route('welcome') }}" class="nav-link">
+            <a href="{{ route('login', ['book' => 'phong-chong-duoi-nuoc', 'lesson' => 'an-toan-nuoc']) }}" class="nav-link">
               <span class="nav-emoji">🏠</span>
               <span>Trang chủ</span>
             </a>

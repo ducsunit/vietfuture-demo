@@ -124,14 +124,33 @@ async function setDisplayName(name) {
 async function loadLesson() {
   try {
     if (!bookUid || !lessonId) {
+      console.log('Missing bookUid or lessonId:', { bookUid, lessonId });
       LESSON = null;
       return;
     }
     const q = new URLSearchParams({ book: bookUid, lesson: lessonId }).toString();
+    console.log('Loading lesson with params:', q);
     const res = await fetch(`/api/lesson?${q}`, { headers: { Accept: 'application/json' } });
+    
+    if (!res.ok) {
+      console.error('API request failed:', res.status, res.statusText);
+      const errorData = await res.json().catch(() => ({}));
+      console.error('Error details:', errorData);
+      LESSON = null;
+      return;
+    }
+    
     const data = await res.json();
+    console.log('API response:', data);
     LESSON = data && data.lesson ? data.lesson : null;
+    
+    if (!LESSON) {
+      console.warn('No lesson found in response:', data);
+    } else {
+      console.log('Lesson loaded successfully:', LESSON.title);
+    }
   } catch (e) {
+    console.error('Error loading lesson:', e);
     LESSON = null;
   }
 }
@@ -145,23 +164,11 @@ function getQuiz() {
   };
 }
 
-const REWARDS = {
-  stickers: [
-    { id: "stk-phao", name: "Phao cứu hộ", emoji: "🛟", points: 10 },
-    { id: "stk-ca-heo", name: "Bạn cá heo", emoji: "🐬", points: 15 },
-    { id: "stk-sao-bien", name: "Sao biển", emoji: "⭐", points: 20 },
-    { id: "stk-cua", name: "Cua biển", emoji: "🦀", points: 25 },
-    { id: "stk-rong", name: "Rồng biển", emoji: "🐉", points: 30 },
-  ],
-  badges: [
-    { id: "bd-hero", name: "Người hùng an toàn nước", emoji: "🏅", points: 50 },
-    { id: "bd-swimmer", name: "Vận động viên bơi lội", emoji: "🏊‍♂️", points: 40 },
-    { id: "bd-lifeguard", name: "Cứu hộ viên", emoji: "🚑", points: 60 },
-  ],
-  backgrounds: [
-    { id: "bg-ocean", name: "Nền đại dương", emoji: "🌊", points: 35 },
-    { id: "bg-beach", name: "Nền bãi biển", emoji: "🏖️", points: 45 },
-  ],
+// Rewards data will be loaded from database
+let REWARDS = {
+  sticker: [],
+  badge: [],
+  background: []
 };
 
 let current = 0;
@@ -171,11 +178,13 @@ let timeLeft = 0; // will derive from getQuiz()
 let timerId = null;
 var answers = {};
 
-// Hệ thống điểm và phần quà
+// Hệ thống điểm và phần quà - loaded from database
 let userPoints = 0;
-let userRewards = [];
-let userBadges = [];
-let userBackgrounds = [];
+let userOwnedRewards = {
+  sticker: [],
+  badge: [],
+  background: []
+};
 
 function render() {
   const QUIZ = getQuiz();
@@ -264,6 +273,276 @@ function renderSingle(q) {
     }, 150);
   });
 }
+
+// Hàm trang bị nền
+async function equipBackground(rewardId) {
+  try {
+    const response = await fetch('/api/rewards/equip', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ 
+        reward_id: rewardId,
+        action: 'equip'
+      })
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      await Swal.fire({
+        title: '✅ Đã trang bị!',
+        text: result.message,
+        icon: 'success',
+        confirmButtonText: 'OK',
+        timer: 2000
+      });
+
+      // Apply background immediately
+      applyEquippedBackground();
+      
+    } else {
+      await Swal.fire({
+        title: '❌ Lỗi',
+        text: result.error || 'Không thể trang bị',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+    }
+  } catch (error) {
+    console.error('Error equipping background:', error);
+    await Swal.fire({
+      title: '❌ Lỗi',
+      text: 'Không thể kết nối đến server',
+      icon: 'error',
+      confirmButtonText: 'OK'
+    });
+  }
+}
+
+// Hàm áp dụng nền đã trang bị
+async function applyEquippedBackground() {
+  try {
+    const response = await fetch('/api/rewards/background');
+    const data = await response.json();
+    
+    if (data.background) {
+      // Apply background based on the reward ID
+      const body = document.body;
+      const backgroundId = data.background.id;
+      
+      // Remove existing background classes
+      body.classList.remove('bg-ocean', 'bg-beach', 'bg-coral', 'bg-sunset', 'bg-underwater', 'bg-island');
+      
+      // Apply background styles
+      applyBackgroundStyles(backgroundId, data.background.emoji);
+    }
+  } catch (error) {
+    console.error('Error applying background:', error);
+  }
+}
+
+// Hàm áp dụng styles cho background
+function applyBackgroundStyles(backgroundId, emoji) {
+  const existingStyle = document.getElementById('dynamic-background-style');
+  if (existingStyle) {
+    existingStyle.remove();
+  }
+
+  const style = document.createElement('style');
+  style.id = 'dynamic-background-style';
+  
+  let backgroundCSS = '';
+  
+  switch (backgroundId) {
+    case 'bg-ocean':
+      backgroundCSS = `
+        body::after {
+          content: '${emoji}';
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 50%, #0369a1 100%);
+          z-index: -1;
+          font-size: 100px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          opacity: 0.1;
+          pointer-events: none;
+        }
+      `;
+      break;
+    case 'bg-beach':
+      backgroundCSS = `
+        body::after {
+          content: '${emoji}';
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(135deg, #f59e0b 0%, #f97316 50%, #ea580c 100%);
+          z-index: -1;
+          font-size: 100px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          opacity: 0.1;
+          pointer-events: none;
+        }
+      `;
+      break;
+    case 'bg-coral':
+      backgroundCSS = `
+        body::after {
+          content: '${emoji}';
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(135deg, #ec4899 0%, #f43f5e 50%, #e11d48 100%);
+          z-index: -1;
+          font-size: 100px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          opacity: 0.1;
+          pointer-events: none;
+        }
+      `;
+      break;
+    case 'bg-sunset':
+      backgroundCSS = `
+        body::after {
+          content: '${emoji}';
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(135deg, #f97316 0%, #fb923c 25%, #fbbf24 50%, #f59e0b 75%, #f97316 100%);
+          z-index: -1;
+          font-size: 100px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          opacity: 0.1;
+          pointer-events: none;
+        }
+      `;
+      break;
+    case 'bg-underwater':
+      backgroundCSS = `
+        body::after {
+          content: '${emoji}';
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 25%, #2563eb 50%, #3b82f6 75%, #60a5fa 100%);
+          z-index: -1;
+          font-size: 100px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          opacity: 0.1;
+          pointer-events: none;
+        }
+      `;
+      break;
+    case 'bg-island':
+      backgroundCSS = `
+        body::after {
+          content: '${emoji}';
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(135deg, #10b981 0%, #059669 25%, #047857 50%, #065f46 75%, #064e3b 100%);
+          z-index: -1;
+          font-size: 100px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          opacity: 0.1;
+          pointer-events: none;
+        }
+      `;
+      break;
+  }
+  
+  style.textContent = backgroundCSS;
+  document.head.appendChild(style);
+}
+
+// Hàm gỡ bỏ nền
+async function unequipBackground(rewardId) {
+  try {
+    const response = await fetch('/api/rewards/equip', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ 
+        reward_id: rewardId,
+        action: 'unequip'
+      })
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      await Swal.fire({
+        title: '✅ Đã gỡ bỏ!',
+        text: result.message,
+        icon: 'success',
+        confirmButtonText: 'OK',
+        timer: 2000
+      });
+
+      // Remove background
+      const existingStyle = document.getElementById('dynamic-background-style');
+      if (existingStyle) {
+        existingStyle.remove();
+      }
+      
+      // Refresh collection
+      showCollection();
+      
+    } else {
+      await Swal.fire({
+        title: '❌ Lỗi',
+        text: result.error || 'Không thể gỡ bỏ',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+    }
+  } catch (error) {
+    console.error('Error unequipping background:', error);
+    await Swal.fire({
+      title: '❌ Lỗi',
+      text: 'Không thể kết nối đến server',
+      icon: 'error',
+      confirmButtonText: 'OK'
+    });
+  }
+}
+
+// Auto-apply equipped background on page load
+document.addEventListener('DOMContentLoaded', function() {
+  applyEquippedBackground();
+});
 
 function renderOrder(q) {
   const zone = $("#zone");
@@ -513,228 +792,260 @@ function confettiBurst() {
   tick();
 }
 
-// Hàm hiển thị cửa hàng phần quà
-function showRewardShop() {
+// Hàm hiển thị cửa hàng phần quà - sử dụng database
+async function showRewardShop() {
   const root = $("#view");
-  let html = `<div class="card"><h2>🛍️ Cửa hàng phần quà</h2>`;
+  
+  try {
+    // Load rewards from database
+    const response = await fetch('/api/rewards');
+    const data = await response.json();
+    
+    REWARDS = data.rewards;
+    userPoints = data.user_points;
 
-  // Hiển thị điểm hiện tại
-  html += `<div style='background:#f0f9ff; border:1px solid #0ea5e9; border-radius:8px; padding:16px; margin-bottom:24px; text-align:center;'>`;
-  html += `<div style='font-size:24px; font-weight:bold; color:#0ea5e9;'>${userPoints} điểm</div>`;
-  html += `<div style='color:#0369a1;'>Điểm khả dụng</div>`;
-  html += `</div>`;
+    let html = `<div class="card"><h2>🛍️ Cửa hàng phần quà</h2>`;
 
-  // Phần Stickers
-  html += `<h3 style='margin:24px 0 16px 0; color:#374151;'>🎨 Stickers</h3>`;
-  html += `<div style='display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:32px;'>`;
-  REWARDS.stickers.forEach((sticker) => {
-    const isOwned = userRewards.includes(sticker.id);
-    const canAfford = userPoints >= sticker.points;
-    html += `<div style='border:2px solid ${isOwned ? "#10b981" : "#e5e7eb"}; border-radius:12px; padding:16px; background:${isOwned ? "#ecfdf5" : "#f9fafb"}; text-align:center;'>`;
-    html += `<div style='font-size:32px; margin-bottom:8px;'>${sticker.emoji}</div>`;
-    html += `<div style='font-weight:600; margin-bottom:4px;'>${sticker.name}</div>`;
-    html += `<div style='color:#6b7280; font-size:14px; margin-bottom:12px;'>${sticker.points} điểm</div>`;
-    if (isOwned) {
-      html += `<div style='color:#059669; font-weight:600;'>✅ Đã sở hữu</div>`;
-    } else if (canAfford) {
-      html += `<button class='btn btn-primary' style='width:100%;' onclick='buyReward("sticker", "${sticker.id}")'>Mua ngay</button>`;
-    } else {
-      html += `<div style='color:#ef4444; font-weight:600;'>❌ Không đủ điểm</div>`;
-    }
+    // Hiển thị điểm hiện tại
+    html += `<div style='background:#f0f9ff; border:1px solid #0ea5e9; border-radius:8px; padding:16px; margin-bottom:24px; text-align:center;'>`;
+    html += `<div style='font-size:24px; font-weight:bold; color:#0ea5e9;'>${userPoints} điểm</div>`;
+    html += `<div style='color:#0369a1;'>Điểm khả dụng</div>`;
     html += `</div>`;
-  });
-  html += `</div>`;
+
+    // Phần Stickers
+    if (REWARDS.sticker && REWARDS.sticker.length > 0) {
+      html += `<h3 style='margin:24px 0 16px 0; color:#374151;'>🎨 Stickers</h3>`;
+      html += `<div style='display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:32px;'>`;
+      REWARDS.sticker.forEach((sticker) => {
+        const isOwned = sticker.is_owned;
+        const canAfford = sticker.can_afford;
+        html += `<div style='border:2px solid ${isOwned ? "#10b981" : "#e5e7eb"}; border-radius:12px; padding:16px; background:${isOwned ? "#ecfdf5" : "#f9fafb"}; text-align:center;'>`;
+        html += `<div style='font-size:32px; margin-bottom:8px;'>${sticker.emoji}</div>`;
+        html += `<div style='font-weight:600; margin-bottom:4px;'>${sticker.name}</div>`;
+        html += `<div style='color:#6b7280; font-size:14px; margin-bottom:12px;'>${sticker.points} điểm</div>`;
+        if (isOwned) {
+          html += `<div style='color:#059669; font-weight:600;'>✅ Đã sở hữu</div>`;
+        } else if (canAfford) {
+          html += `<button class='btn btn-primary' style='width:100%;' onclick='buyReward("${sticker.id}")'>Mua ngay</button>`;
+        } else {
+          html += `<div style='color:#ef4444; font-weight:600;'>❌ Không đủ điểm</div>`;
+        }
+        html += `</div>`;
+      });
+      html += `</div>`;
+    }
 
   // Phần Badges
   html += `<h3 style='margin:24px 0 16px 0; color:#374151;'>🏅 Huy hiệu</h3>`;
   html += `<div style='display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:32px;'>`;
-  REWARDS.badges.forEach((badge) => {
-    const isOwned = userBadges.includes(badge.id);
-    const canAfford = userPoints >= badge.points;
-    html += `<div style='border:2px solid ${isOwned ? "#f59e0b" : "#e5e7eb"}; border-radius:12px; padding:16px; background:${isOwned ? "#fffbeb" : "#f9fafb"}; text-align:center;'>`;
-    html += `<div style='font-size:32px; margin-bottom:8px;'>${badge.emoji}</div>`;
-    html += `<div style='font-weight:600; margin-bottom:4px;'>${badge.name}</div>`;
-    html += `<div style='color:#6b7280; font-size:14px; margin-bottom:12px;'>${badge.points} điểm</div>`;
-    if (isOwned) {
-      html += `<div style='color:#d97706; font-weight:600;'>✅ Đã sở hữu</div>`;
-    } else if (canAfford) {
-      html += `<button class='btn btn-primary' style='width:100%;' onclick='buyReward("badge", "${badge.id}")'>Mua ngay</button>`;
-    } else {
-      html += `<div style='color:#ef4444; font-weight:600;'>❌ Không đủ điểm</div>`;
-    }
-    html += `</div>`;
-  });
+  if (REWARDS.badge) {
+    REWARDS.badge.forEach((badge) => {
+      const isOwned = badge.is_owned;
+      const canAfford = badge.can_afford;
+      html += `<div style='border:2px solid ${isOwned ? "#f59e0b" : "#e5e7eb"}; border-radius:12px; padding:16px; background:${isOwned ? "#fffbeb" : "#f9fafb"}; text-align:center;'>`;
+      html += `<div style='font-size:32px; margin-bottom:8px;'>${badge.emoji}</div>`;
+      html += `<div style='font-weight:600; margin-bottom:4px;'>${badge.name}</div>`;
+      html += `<div style='color:#6b7280; font-size:14px; margin-bottom:12px;'>${badge.points} điểm</div>`;
+      if (isOwned) {
+        html += `<div style='color:#d97706; font-weight:600;'>✅ Đã sở hữu</div>`;
+      } else if (canAfford) {
+        html += `<button class='btn btn-primary' style='width:100%;' onclick='buyReward("${badge.id}")'>Mua ngay</button>`;
+      } else {
+        html += `<div style='color:#ef4444; font-weight:600;'>❌ Không đủ điểm</div>`;
+      }
+      html += `</div>`;
+    });
+  }
   html += `</div>`;
 
   // Phần Backgrounds
   html += `<h3 style='margin:24px 0 16px 0; color:#374151;'>🖼️ Nền tùy chỉnh</h3>`;
   html += `<div style='display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:32px;'>`;
-  REWARDS.backgrounds.forEach((bg) => {
-    const isOwned = userBackgrounds.includes(bg.id);
-    const canAfford = userPoints >= bg.points;
-    html += `<div style='border:2px solid ${isOwned ? "#8b5cf6" : "#e5e7eb"}; border-radius:12px; padding:16px; background:${isOwned ? "#f3f4f6" : "#f9fafb"}; text-align:center;'>`;
-    html += `<div style='font-size:32px; margin-bottom:8px;'>${bg.emoji}</div>`;
-    html += `<div style='font-weight:600; margin-bottom:4px;'>${bg.name}</div>`;
-    html += `<div style='color:#6b7280; font-size:14px; margin-bottom:12px;'>${bg.points} điểm</div>`;
-    if (isOwned) {
-      html += `<div style='color:#7c3aed; font-weight:600;'>✅ Đã sở hữu</div>`;
-    } else if (canAfford) {
-      html += `<button class='btn btn-primary' style='width:100%;' onclick='buyReward("background", "${bg.id}")'>Mua ngay</button>`;
-    } else {
-      html += `<div style='color:#ef4444; font-weight:600;'>❌ Không đủ điểm</div>`;
-    }
+  if (REWARDS.background) {
+    REWARDS.background.forEach((bg) => {
+      const isOwned = bg.is_owned;
+      const canAfford = bg.can_afford;
+      html += `<div style='border:2px solid ${isOwned ? "#8b5cf6" : "#e5e7eb"}; border-radius:12px; padding:16px; background:${isOwned ? "#f3f4f6" : "#f9fafb"}; text-align:center;'>`;
+      html += `<div style='font-size:32px; margin-bottom:8px;'>${bg.emoji}</div>`;
+      html += `<div style='font-weight:600; margin-bottom:4px;'>${bg.name}</div>`;
+      html += `<div style='color:#6b7280; font-size:14px; margin-bottom:12px;'>${bg.points} điểm</div>`;
+      if (isOwned) {
+        html += `<div style='color:#7c3aed; font-weight:600;'>✅ Đã sở hữu</div>`;
+        html += `<button class='btn btn-secondary' style='width:100%; margin-top:8px;' onclick='equipBackground("${bg.id}")'>Trang bị</button>`;
+      } else if (canAfford) {
+        html += `<button class='btn btn-primary' style='width:100%;' onclick='buyReward("${bg.id}")'>Mua ngay</button>`;
+      } else {
+        html += `<div style='color:#ef4444; font-weight:600;'>❌ Không đủ điểm</div>`;
+      }
+      html += `</div>`;
+    });
+  }
+  html += `</div>`;
+
     html += `</div>`;
-  });
-  html += `</div>`;
-
-  // Footer section bỏ các nút không cần thiết
-  html += `</div>`;
-
-  root.innerHTML = html;
+    root.innerHTML = html;
+    
+  } catch (error) {
+    console.error('Error loading rewards:', error);
+    root.innerHTML = `<div class="card"><h2>❌ Không thể tải cửa hàng</h2><p>Vui lòng thử lại sau.</p></div>`;
+  }
 }
 
-// Hàm mua phần quà
-function buyReward(type, rewardId) {
-  let reward;
-  let points;
-
-  if (type === "sticker") {
-    reward = REWARDS.stickers.find((s) => s.id === rewardId);
-    if (userRewards.includes(rewardId)) {
-      alert("Bạn đã sở hữu sticker này rồi!");
-      return;
-    }
-  } else if (type === "badge") {
-    reward = REWARDS.badges.find((b) => b.id === rewardId);
-    if (userBadges.includes(rewardId)) {
-      alert("Bạn đã sở hữu huy hiệu này rồi!");
-      return;
-    }
-  } else if (type === "background") {
-    reward = REWARDS.backgrounds.find((bg) => bg.id === rewardId);
-    if (userBackgrounds.includes(rewardId)) {
-      alert("Bạn đã sở hữu nền này rồi!");
-      return;
-    }
-  }
-
-  if (!reward) return;
-
-  if (userPoints >= reward.points) {
-    // gọi API trừ điểm trên DB
-    fetch('/api/redeem', {
+// Hàm mua phần quà - sử dụng database
+async function buyReward(rewardId) {
+  try {
+    const response = await fetch('/api/rewards/purchase', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': (window.Laravel && window.Laravel.csrfToken) || '',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
         'Accept': 'application/json'
       },
-      body: JSON.stringify({ cost: reward.points })
-    }).then(r => r.json()).then(j => {
-      if (j.ok) {
-        userPoints = j.point;
-        alert(`🎉 Chúc mừng! Bạn đã mua thành công ${reward.name}!`);
-        updateHeaderPoints();
-        showRewardShop();
-      } else {
-        alert(j.error || 'Không thể quy đổi.');
-      }
-    }).catch(() => alert('Không thể quy đổi.'));
-  } else {
-    alert("❌ Không đủ điểm để mua phần quà này!");
+      body: JSON.stringify({ reward_id: rewardId })
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      // Show success message
+      await Swal.fire({
+        title: '🎉 Thành công!',
+        text: result.message,
+        icon: 'success',
+        confirmButtonText: 'Tuyệt vời!',
+        timer: 3000
+      });
+
+      // Update user points
+      userPoints = result.user_points;
+      updateHeaderPoints();
+      
+      // Refresh shop
+      showRewardShop();
+    } else {
+      await Swal.fire({
+        title: '❌ Lỗi',
+        text: result.error || 'Không thể mua phần quà',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+    }
+  } catch (error) {
+    console.error('Error purchasing reward:', error);
+    await Swal.fire({
+      title: '❌ Lỗi',
+      text: 'Không thể kết nối đến server',
+      icon: 'error',
+      confirmButtonText: 'OK'
+    });
   }
 }
 
 // Hàm hiển thị bộ sưu tập
-function showCollection() {
+// Hàm hiển thị bộ sưu tập - sử dụng database
+async function showCollection() {
   const root = $("#view");
-  let html = `<div class="card"><h2>📚 Bộ sưu tập của tôi</h2>`;
+  
+  try {
+    // Load user's owned rewards
+    const response = await fetch('/api/rewards/user');
+    const data = await response.json();
+    
+    userOwnedRewards = data.rewards || { sticker: [], badge: [], background: [] };
+    userPoints = data.user_points;
 
-  // Thống kê tổng quan
-  const totalStickers = userRewards.length;
-  const totalBadges = userBadges.length;
-  const totalBackgrounds = userBackgrounds.length;
+    let html = `<div class="card"><h2>📚 Bộ sưu tập của bạn</h2>`;
 
-  html += `<div style='background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:16px; margin-bottom:24px;'>`;
-  html += `<h3 style='margin:0 0 12px 0; color:#374151;'>📊 Thống kê</h3>`;
-  html += `<div style='display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:12px;'>`;
-  html += `<div style='text-align:center; padding:12px; background:#ecfdf5; border-radius:8px;'>`;
-  html += `<div style='font-size:24px; font-weight:bold; color:#059669;'>${totalStickers}</div>`;
-  html += `<div style='color:#047857; font-size:14px;'>Stickers</div>`;
-  html += `</div>`;
-  html += `<div style='text-align:center; padding:12px; background:#fffbeb; border-radius:8px;'>`;
-  html += `<div style='font-size:24px; font-weight:bold; color:#d97706;'>${totalBadges}</div>`;
-  html += `<div style='color:#b45309; font-size:14px;'>Huy hiệu</div>`;
-  html += `</div>`;
-  html += `<div style='text-align:center; padding:12px; background:#f3f4f6; border-radius:8px;'>`;
-  html += `<div style='font-size:24px; font-weight:bold; color:#7c3aed;'>${totalBackgrounds}</div>`;
-  html += `<div style='color:#6d28d9; font-size:14px;'>Nền tùy chỉnh</div>`;
-  html += `</div>`;
-  html += `</div>`;
-  html += `</div>`;
+    // Thống kê tổng quan
+    const totalStickers = userOwnedRewards.sticker?.length || 0;
+    const totalBadges = userOwnedRewards.badge?.length || 0;
+    const totalBackgrounds = userOwnedRewards.background?.length || 0;
 
-  // Hiển thị Stickers đã sở hữu
-  if (userRewards.length > 0) {
-    html += `<h3 style='margin:24px 0 16px 0; color:#374151;'>🎨 Stickers của tôi</h3>`;
-    html += `<div style='display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:12px; margin-bottom:24px;'>`;
-    userRewards.forEach((rewardId) => {
-      const sticker = REWARDS.stickers.find((s) => s.id === rewardId);
-      if (sticker) {
+    html += `<div style='background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:16px; margin-bottom:24px;'>`;
+    html += `<h3 style='margin:0 0 12px 0; color:#374151;'>📊 Thống kê</h3>`;
+    html += `<div style='display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:12px;'>`;
+    html += `<div style='text-align:center; padding:12px; background:#ecfdf5; border-radius:8px;'>`;
+    html += `<div style='font-size:24px; font-weight:bold; color:#059669;'>${totalStickers}</div>`;
+    html += `<div style='color:#047857; font-size:14px;'>Stickers</div>`;
+    html += `</div>`;
+    html += `<div style='text-align:center; padding:12px; background:#fffbeb; border-radius:8px;'>`;
+    html += `<div style='font-size:24px; font-weight:bold; color:#d97706;'>${totalBadges}</div>`;
+    html += `<div style='color:#b45309; font-size:14px;'>Huy hiệu</div>`;
+    html += `</div>`;
+    html += `<div style='text-align:center; padding:12px; background:#f3f4f6; border-radius:8px;'>`;
+    html += `<div style='font-size:24px; font-weight:bold; color:#7c3aed;'>${totalBackgrounds}</div>`;
+    html += `<div style='color:#6d28d9; font-size:14px;'>Nền giao diện</div>`;
+    html += `</div>`;
+    html += `</div>`;
+    html += `</div>`;
+
+    // Phần Stickers đã sở hữu
+    if (userOwnedRewards.sticker && userOwnedRewards.sticker.length > 0) {
+      html += `<h3 style='margin:24px 0 16px 0; color:#374151;'>🎨 Stickers của bạn</h3>`;
+      html += `<div style='display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:16px; margin-bottom:32px;'>`;
+      userOwnedRewards.sticker.forEach((sticker) => {
         html += `<div style='border:2px solid #10b981; border-radius:12px; padding:16px; background:#ecfdf5; text-align:center;'>`;
         html += `<div style='font-size:32px; margin-bottom:8px;'>${sticker.emoji}</div>`;
-        html += `<div style='font-weight:600; font-size:14px; color:#047857;'>${sticker.name}</div>`;
+        html += `<div style='font-weight:600; color:#059669;'>${sticker.name}</div>`;
+        html += `<div style='font-size:12px; color:#6b7280; margin-top:4px;'>Mua ngày ${new Date(sticker.purchased_at).toLocaleDateString('vi-VN')}</div>`;
         html += `</div>`;
-      }
-    });
-    html += `</div>`;
-  }
+      });
+      html += `</div>`;
+    }
 
-  // Hiển thị Badges đã sở hữu
-  if (userBadges.length > 0) {
-    html += `<h3 style='margin:24px 0 16px 0; color:#374151;'>🏅 Huy hiệu của tôi</h3>`;
-    html += `<div style='display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:12px; margin-bottom:24px;'>`;
-    userBadges.forEach((badgeId) => {
-      const badge = REWARDS.badges.find((b) => b.id === badgeId);
-      if (badge) {
+    // Phần Badges đã sở hữu
+    if (userOwnedRewards.badge && userOwnedRewards.badge.length > 0) {
+      html += `<h3 style='margin:24px 0 16px 0; color:#374151;'>🏅 Huy hiệu của bạn</h3>`;
+      html += `<div style='display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:16px; margin-bottom:32px;'>`;
+      userOwnedRewards.badge.forEach((badge) => {
         html += `<div style='border:2px solid #f59e0b; border-radius:12px; padding:16px; background:#fffbeb; text-align:center;'>`;
         html += `<div style='font-size:32px; margin-bottom:8px;'>${badge.emoji}</div>`;
-        html += `<div style='font-weight:600; font-size:14px; color:#b45309;'>${badge.name}</div>`;
+        html += `<div style='font-weight:600; color:#d97706;'>${badge.name}</div>`;
+        html += `<div style='font-size:12px; color:#6b7280; margin-top:4px;'>Mua ngày ${new Date(badge.purchased_at).toLocaleDateString('vi-VN')}</div>`;
         html += `</div>`;
-      }
-    });
-    html += `</div>`;
-  }
+      });
+      html += `</div>`;
+    }
 
-  // Hiển thị Backgrounds đã sở hữu
-  if (userBackgrounds.length > 0) {
-    html += `<h3 style='margin:24px 0 16px 0; color:#374151;'>🖼️ Nền tùy chỉnh của tôi</h3>`;
-    html += `<div style='display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:12px; margin-bottom:24px;'>`;
-    userBackgrounds.forEach((bgId) => {
-      const bg = REWARDS.backgrounds.find((b) => b.id === bgId);
-      if (bg) {
+    // Phần Backgrounds đã sở hữu
+    if (userOwnedRewards.background && userOwnedRewards.background.length > 0) {
+      html += `<h3 style='margin:24px 0 16px 0; color:#374151;'>🎨 Nền giao diện của bạn</h3>`;
+      html += `<div style='display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:16px; margin-bottom:32px;'>`;
+      userOwnedRewards.background.forEach((bg) => {
         html += `<div style='border:2px solid #8b5cf6; border-radius:12px; padding:16px; background:#f3f4f6; text-align:center;'>`;
         html += `<div style='font-size:32px; margin-bottom:8px;'>${bg.emoji}</div>`;
-        html += `<div style='font-weight:600; font-size:14px; color:#6d28d9;'>${bg.name}</div>`;
+        html += `<div style='font-weight:600; color:#7c3aed; margin-bottom:8px;'>${bg.name}</div>`;
+        if (bg.is_equipped) {
+          html += `<div style='color:#059669; font-weight:600; margin-bottom:8px;'>✅ Đang sử dụng</div>`;
+          html += `<button class='btn btn-secondary' style='width:100%;' onclick='unequipBackground("${bg.id}")'>Gỡ bỏ</button>`;
+        } else {
+          html += `<button class='btn btn-primary' style='width:100%;' onclick='equipBackground("${bg.id}")'>Trang bị</button>`;
+        }
+        html += `<div style='font-size:12px; color:#6b7280; margin-top:8px;'>Mua ngày ${new Date(bg.purchased_at).toLocaleDateString('vi-VN')}</div>`;
         html += `</div>`;
-      }
-    });
+      });
+      html += `</div>`;
+    }
+
+    // Thông báo nếu chưa có gì
+    if (totalStickers === 0 && totalBadges === 0 && totalBackgrounds === 0) {
+      html += `<div style='text-align:center; padding:40px; color:#6b7280;'>`;
+      html += `<div style='font-size:48px; margin-bottom:16px;'>📦</div>`;
+      html += `<div style='font-size:18px; font-weight:600; margin-bottom:8px;'>Bộ sưu tập trống</div>`;
+      html += `<div style='font-size:14px;'>Hãy hoàn thành bài quiz và mua phần quà để bắt đầu bộ sưu tập!</div>`;
+      html += `</div>`;
+    }
+
+    // Nút quay lại cửa hàng
+    html += `<div class='foot'><button class='btn btn-ghost' onclick='showRewardShop()'>◀ Quay lại cửa hàng</button></div>`;
     html += `</div>`;
+
+    root.innerHTML = html;
+    
+  } catch (error) {
+    console.error('Error loading collection:', error);
+    root.innerHTML = `<div class="card"><h2>❌ Không thể tải bộ sưu tập</h2><p>Vui lòng thử lại sau.</p></div>`;
   }
-
-  // Thông báo nếu chưa có gì
-  if (userRewards.length === 0 && userBadges.length === 0 && userBackgrounds.length === 0) {
-    html += `<div style='text-align:center; padding:40px; color:#6b7280;'>`;
-    html += `<div style='font-size:48px; margin-bottom:16px;'>📦</div>`;
-    html += `<div style='font-size:18px; font-weight:600; margin-bottom:8px;'>Bộ sưu tập trống</div>`;
-    html += `<div style='font-size:14px;'>Hãy hoàn thành bài quiz và mua phần quà để bắt đầu bộ sưu tập!</div>`;
-    html += `</div>`;
-  }
-
-  // Nút quay lại cửa hàng
-  html += `<div class='foot'><button class='btn btn-ghost' onclick='showRewardShop()'>◀ Quay lại cửa hàng</button></div>`;
-  html += `</div>`;
-
-  root.innerHTML = html;
 }
 
 // Hiển thị điểm trên header

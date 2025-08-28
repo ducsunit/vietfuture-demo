@@ -9,8 +9,8 @@ class BookContentSeeder extends Seeder
 {
     public function run(): void
     {
-        // Seed nội dung cho BOOK-A
-        $book = Book::firstOrCreate(['book_uid' => 'BOOK-A'], ['title' => 'Sách Kỹ năng sống A']);
+        // Seed nội dung cho book với UID phù hợp với route mặc định
+        $book = Book::firstOrCreate(['book_uid' => 'phong-chong-duoi-nuoc'], ['title' => 'Phòng chống đuối nước']);
 
         $content = [
             'lessons' => [

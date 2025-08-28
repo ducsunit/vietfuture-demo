@@ -5,9 +5,12 @@ use App\Http\Controllers\DemoController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 
-// Welcome page route
+// Redirect root to login with default book/lesson (bypass welcome page)
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login', [
+        'book' => 'phong-chong-duoi-nuoc', 
+        'lesson' => 'an-toan-nuoc'
+    ]);
 })->name('welcome');
 
 
@@ -50,6 +53,13 @@ Route::post('/api/redeem', function(\Illuminate\Http\Request $request) {
     session(['point' => (int) $user->point]);
     return response()->json(['ok' => true, 'point' => (int) $user->point]);
 })->name('api.redeem');
+
+// Reward System Routes
+Route::get('/api/rewards', [App\Http\Controllers\RewardController::class, 'index'])->name('api.rewards.index');
+Route::get('/api/rewards/user', [App\Http\Controllers\RewardController::class, 'getUserRewards'])->name('api.rewards.user');
+Route::post('/api/rewards/purchase', [App\Http\Controllers\RewardController::class, 'purchase'])->name('api.rewards.purchase');
+Route::post('/api/rewards/equip', [App\Http\Controllers\RewardController::class, 'equip'])->name('api.rewards.equip');
+Route::get('/api/rewards/background', [App\Http\Controllers\RewardController::class, 'getEquippedBackground'])->name('api.rewards.background');
 
 Route::post('/api/add-points', function(\Illuminate\Http\Request $request) {
     $inc = (int) $request->input('inc', 0);
