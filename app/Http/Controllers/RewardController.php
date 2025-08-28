@@ -19,7 +19,7 @@ class RewardController extends Controller
         $user = $userId ? User::find($userId) : null;
 
         $rewards = Reward::active()->get()->groupBy('type');
-        
+
         $response = [];
         foreach ($rewards as $type => $typeRewards) {
             $response[$type] = $typeRewards->map(function ($reward) use ($user) {
@@ -57,9 +57,9 @@ class RewardController extends Controller
         }
 
         $userRewards = $user->userRewards()->with('reward')->get();
-        
+
         $grouped = $userRewards->groupBy('reward.type');
-        
+
         $response = [];
         foreach ($grouped as $type => $rewards) {
             $response[$type] = $rewards->map(function ($userReward) {
@@ -99,8 +99,8 @@ class RewardController extends Controller
         }
 
         $reward = Reward::where('reward_id', $request->reward_id)
-                        ->where('is_active', true)
-                        ->first();
+            ->where('is_active', true)
+            ->first();
 
         if (!$reward) {
             return response()->json(['error' => 'Reward not found'], 404);
@@ -135,7 +135,7 @@ class RewardController extends Controller
     }
 
     /**
-     * Equip/unequip a reward (for backgrounds)
+     * Equip/unequip a reward (supports backgrounds and badges)
      */
     public function equip(Request $request): JsonResponse
     {
@@ -194,7 +194,7 @@ class RewardController extends Controller
         }
 
         $equippedBackground = $user->getEquippedBackground();
-        
+
         if ($equippedBackground) {
             return response()->json([
                 'background' => [
@@ -206,5 +206,37 @@ class RewardController extends Controller
         }
 
         return response()->json(['background' => null]);
+    }
+
+    /**
+     * Get user's equipped badges for display next to names
+     */
+    public function getEquippedBadge(Request $request): JsonResponse
+    {
+        $userId = session('user_id');
+        if (!$userId) {
+            return response()->json(['badge' => null]);
+        }
+
+        $user = User::find($userId);
+        if (!$user) {
+            return response()->json(['badge' => null]);
+        }
+
+        $equippedBadges = $user->getEquippedBadges();
+
+        if ($equippedBadges && $equippedBadges->count()) {
+            return response()->json([
+                'badges' => $equippedBadges->map(function ($ur) {
+                    return [
+                        'id' => $ur->reward->reward_id,
+                        'name' => $ur->reward->name,
+                        'emoji' => $ur->reward->emoji,
+                    ];
+                })
+            ]);
+        }
+
+        return response()->json(['badges' => []]);
     }
 }

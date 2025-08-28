@@ -11,7 +11,12 @@ class User extends Model
     use HasFactory;
 
     protected $fillable = [
-        'username', 'password', 'age', 'role', 'point', 'display_name'
+        'username',
+        'password',
+        'age',
+        'role',
+        'point',
+        'display_name'
     ];
 
     protected $hidden = ['password'];
@@ -62,6 +67,24 @@ class User extends Model
             ->byType(Reward::TYPE_BACKGROUND)
             ->with('reward')
             ->first();
+    }
+
+    public function getEquippedBadge()
+    {
+        return $this->userRewards()
+            ->equipped()
+            ->byType(Reward::TYPE_BADGE)
+            ->with('reward')
+            ->first();
+    }
+
+    public function getEquippedBadges()
+    {
+        return $this->userRewards()
+            ->equipped()
+            ->byType(Reward::TYPE_BADGE)
+            ->with('reward')
+            ->get();
     }
 
     public function canAffordReward($points)

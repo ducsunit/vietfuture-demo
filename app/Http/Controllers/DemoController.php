@@ -101,10 +101,15 @@ class DemoController extends Controller
     public function communityIndex()
     {
         // Lấy threads từ database với comments
-        $threads = CommunityThread::with(['comments', 'user'])
+        $threads = CommunityThread::with(['comments.user.userRewards.reward', 'user.userRewards.reward'])
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($thread) {
+                $badgeEmojis = [];
+                if ($thread->user) {
+                    $equippedBadges = $thread->user->getEquippedBadges();
+                    $badgeEmojis = $equippedBadges->pluck('reward.emoji')->filter()->values()->toArray();
+                }
                 return [
                     'id' => $thread->thread_uid,
                     'title' => $thread->title,
@@ -112,13 +117,20 @@ class DemoController extends Controller
                     'author' => $thread->author,
                     'created_at' => $thread->created_at->format('Y-m-d H:i:s'),
                     'user' => $thread->user ? $thread->user->username : null,
+                    'badges' => $badgeEmojis,
                     'comments' => $thread->comments->map(function ($comment) {
+                        $commentBadges = [];
+                        if ($comment->user) {
+                            $equippedBadges = $comment->user->getEquippedBadges();
+                            $commentBadges = $equippedBadges->pluck('reward.emoji')->filter()->values()->toArray();
+                        }
                         return [
                             'id' => $comment->comment_uid,
                             'content' => $comment->content,
                             'author' => $comment->author,
                             'created_at' => $comment->created_at->format('Y-m-d H:i:s'),
                             'user' => $comment->user ? $comment->user->username : null,
+                            'badges' => $commentBadges,
                         ];
                     })->toArray(),
                 ];

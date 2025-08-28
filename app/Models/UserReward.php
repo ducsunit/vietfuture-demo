@@ -48,7 +48,8 @@ class UserReward extends Model
     // Helper methods
     public function equip()
     {
-        // Unequip other items of the same type for this user
+        // Unequip other items of the same type for this user (exclusive per type)
+        // Backgrounds remain exclusive; badges can be equipped in multiples
         if ($this->reward->type === Reward::TYPE_BACKGROUND) {
             self::where('user_id', $this->user_id)
                 ->byType(Reward::TYPE_BACKGROUND)

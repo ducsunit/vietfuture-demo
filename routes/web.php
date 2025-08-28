@@ -8,7 +8,7 @@ use App\Http\Controllers\AdminController;
 // Redirect root to login with default book/lesson (bypass welcome page)
 Route::get('/', function () {
     return redirect()->route('login', [
-        'book' => 'phong-chong-duoi-nuoc', 
+        'book' => 'phong-chong-duoi-nuoc',
         'lesson' => 'an-toan-nuoc'
     ]);
 })->name('welcome');
@@ -20,11 +20,11 @@ Route::get('/quiz', [DemoController::class, 'quiz'])->name('quiz'); // Alias for
 Route::post('/demo/progress', [DemoController::class, 'logProgress'])->name('demo.progress');
 
 Route::get('/api/lesson', [DemoController::class, 'getLesson'])->name('api.lesson');
-Route::get('/api/points', function() {
+Route::get('/api/points', function () {
     $userId = session('user_id');
     $username = session('username', '');
     $point = session('point', 0);
-    
+
     // Sync điểm từ database để đảm bảo chính xác
     if ($userId) {
         $user = App\Models\User::find($userId);
@@ -33,15 +33,15 @@ Route::get('/api/points', function() {
             session(['point' => $point]); // update session
         }
     }
-    
+
     return response()->json([
-        'userId' => $userId, 
+        'userId' => $userId,
         'username' => $username,
         'point' => (int) $point
     ]);
 })->name('api.points');
 
-Route::post('/api/redeem', function(\Illuminate\Http\Request $request) {
+Route::post('/api/redeem', function (\Illuminate\Http\Request $request) {
     $cost = (int) $request->input('cost', 0);
     $userId = session('user_id');
     if (!$userId) return response()->json(['ok' => false, 'error' => 'Unauthenticated'], 401);
@@ -60,8 +60,9 @@ Route::get('/api/rewards/user', [App\Http\Controllers\RewardController::class, '
 Route::post('/api/rewards/purchase', [App\Http\Controllers\RewardController::class, 'purchase'])->name('api.rewards.purchase');
 Route::post('/api/rewards/equip', [App\Http\Controllers\RewardController::class, 'equip'])->name('api.rewards.equip');
 Route::get('/api/rewards/background', [App\Http\Controllers\RewardController::class, 'getEquippedBackground'])->name('api.rewards.background');
+Route::get('/api/rewards/badge', [App\Http\Controllers\RewardController::class, 'getEquippedBadge'])->name('api.rewards.badge');
 
-Route::post('/api/add-points', function(\Illuminate\Http\Request $request) {
+Route::post('/api/add-points', function (\Illuminate\Http\Request $request) {
     $inc = (int) $request->input('inc', 0);
     $userId = session('user_id');
     if (!$userId) return response()->json(['ok' => false, 'error' => 'Unauthenticated'], 401);
@@ -75,30 +76,30 @@ Route::post('/api/add-points', function(\Illuminate\Http\Request $request) {
     return response()->json(['ok' => true, 'point' => (int) $user->point]);
 })->name('api.addPoints');
 
-Route::post('/api/set-display-name', function(\Illuminate\Http\Request $request) {
+Route::post('/api/set-display-name', function (\Illuminate\Http\Request $request) {
     $userId = session('user_id');
     if (!$userId) return response()->json(['ok' => false, 'error' => 'Unauthenticated'], 401);
-    
+
     $data = $request->validate([
         'name' => 'required|string|min:2|max:100',
     ]);
-    
+
     $user = App\Models\User::find($userId);
     if (!$user) return response()->json(['ok' => false, 'error' => 'User not found'], 404);
-    
+
     $user->display_name = $data['name'];
     $user->save();
-    
+
     return response()->json(['ok' => true, 'display_name' => $user->display_name]);
 })->name('api.setDisplayName');
 
-Route::get('/api/get-display-name', function() {
+Route::get('/api/get-display-name', function () {
     $userId = session('user_id');
     if (!$userId) return response()->json(['ok' => false, 'error' => 'Unauthenticated'], 401);
-    
+
     $user = App\Models\User::find($userId);
     if (!$user) return response()->json(['ok' => false, 'error' => 'User not found'], 404);
-    
+
     return response()->json(['ok' => true, 'display_name' => $user->display_name]);
 })->name('api.getDisplayName');
 
