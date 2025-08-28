@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 :root {
     --gap: 16px;
     --radius: 14px;
@@ -9,8 +10,8 @@
 
 body {
     margin: 0;
-    font-family: "Fredoka", "Comic Neue", "Inter", system-ui, -apple-system,
-        Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto,
+        Helvetica, Arial, sans-serif;
     background: linear-gradient(135deg, #00a9ff 0%, #a0e9ff 50%, #cdf5fd 100%);
     color: #1a202c;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
@@ -101,7 +102,8 @@ main {
     border: none;
     border-radius: 20px;
     padding: 0.875rem 1.5rem;
-    font-family: "Fredoka", cursive;
+    font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto,
+        Helvetica, Arial, sans-serif;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -171,7 +173,8 @@ main {
     padding: 1rem 1.25rem;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-family: "Fredoka", cursive;
+    font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto,
+        Helvetica, Arial, sans-serif;
     font-weight: 500;
     font-size: 1rem;
     display: flex;
@@ -325,8 +328,8 @@ input[type="email"],
 input[type="number"],
 textarea,
 select {
-    font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Helvetica,
-        Arial, sans-serif !important;
+    font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto,
+        Helvetica, Arial, sans-serif !important;
     font-size: 0.9375rem !important;
     font-weight: 400 !important;
     line-height: 1.5 !important;
@@ -364,7 +367,7 @@ textarea::placeholder {
 textarea {
     resize: vertical !important;
     min-height: 100px !important;
-    font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Helvetica,
-        Arial, sans-serif !important;
+    font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto,
+        Helvetica, Arial, sans-serif !important;
     line-height: 1.6 !important;
 }

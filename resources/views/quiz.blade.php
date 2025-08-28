@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Comic+Neue:wght@300;400;700&family=Inter:wght@300;400;500;600;700;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
         rel="stylesheet">
 
     <link rel="stylesheet" href="{{ asset('css/quiz.css') }}" />
@@ -21,7 +21,7 @@
     <style>
         /* Enhanced Kid-Friendly Styles for Quiz */
         body {
-            font-family: 'Fredoka', 'Comic Neue', 'Inter', cursive;
+            font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background: linear-gradient(135deg, #00a9ff 0%, #a0e9ff 50%, #cdf5fd 100%);
             min-height: 100vh;
             position: relative;
@@ -186,7 +186,7 @@
 
         #view {
             padding: 2rem;
-            font-family: 'Fredoka', 'Comic Neue', cursive;
+            font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
 
         /* Quiz Cards */
@@ -222,7 +222,7 @@
         .card h2,
         .card h3 {
             color: #2d3436;
-            font-family: 'Fredoka', cursive;
+            font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             font-weight: 600;
             text-align: center;
             margin-bottom: 1.5rem;
@@ -238,7 +238,7 @@
 
         /* Buttons */
         .btn {
-            font-family: 'Fredoka', cursive;
+            font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             font-weight: 600;
             border-radius: 20px;
             padding: 0.875rem 1.5rem;
@@ -302,7 +302,7 @@
             padding: 1rem 1.25rem;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-family: 'Fredoka', cursive;
+            font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             font-weight: 500;
             font-size: 1rem;
             display: flex;
@@ -386,7 +386,7 @@
 
         .progress-text {
             text-align: center;
-            font-family: 'Fredoka', cursive;
+            font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             font-weight: 600;
             color: #2d3436;
             font-size: 0.9rem;
@@ -400,7 +400,7 @@
             border-radius: 15px;
             text-align: center;
             margin-bottom: 1rem;
-            font-family: 'Fredoka', cursive;
+            font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             font-weight: 600;
             box-shadow: 0 5px 20px rgba(249, 202, 36, 0.3);
         }
@@ -636,10 +636,12 @@
             <!-- Quiz content will be loaded here by JavaScript -->
             <div class="card" style="text-align: center;">
                 <div class="loading-spinner" style="margin: 2rem auto;"></div>
-                <h2 style="font-family: 'Fredoka', cursive; color: #667eea; margin: 1rem 0;">
+                <h2
+                    style="font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #667eea; margin: 1rem 0;">
                     🎮 Đang tải trò chơi học tập thú vị...
                 </h2>
-                <p style="font-family: 'Fredoka', cursive; color: #94a3b8; font-size: 1rem;">
+                <p
+                    style="font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #94a3b8; font-size: 1rem;">
                     ⏳ Vui lòng chờ một chút nhé!
                 </p>
             </div>

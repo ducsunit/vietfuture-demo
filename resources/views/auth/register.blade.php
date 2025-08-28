@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Comic+Neue:wght@300;400;700&family=Inter:wght@300;400;500;600;700;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
         rel="stylesheet">
 
     <link rel="stylesheet" href="{{ asset('css/quiz.css') }}" />
@@ -21,7 +21,7 @@
             margin: 0;
             min-height: 100vh;
             background: linear-gradient(135deg, #00a9ff 0%, #a0e9ff 50%, #cdf5fd 100%);
-            font-family: 'Fredoka', 'Comic Neue', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -195,7 +195,7 @@
         .form-input {
             width: 100%;
             padding: 1rem 1.25rem;
-            font-family: 'Fredoka', 'Inter', sans-serif;
+            font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             font-size: 1rem;
             font-weight: 500;
             line-height: 1.5;
@@ -248,7 +248,7 @@
         .register-btn {
             width: 100%;
             padding: 1rem 1.5rem;
-            font-family: 'Fredoka', 'Inter', sans-serif;
+            font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             font-size: 1rem;
             font-weight: 600;
             color: white;

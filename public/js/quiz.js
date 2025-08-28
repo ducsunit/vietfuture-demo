@@ -211,7 +211,7 @@ function render() {
         root.innerHTML = `
     <div class="card">
       <h2>🔍 Không tìm thấy nội dung bài học</h2>
-      <p style="text-align: center; font-family: 'Fredoka', cursive; color: #667eea; margin: 1rem 0;">
+      <p style="text-align: center; font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #667eea; margin: 1rem 0;">
         🤔 Vui lòng kiểm tra tham số book/lesson hoặc liên hệ quản trị.
       </p>
       <div style="text-align: center; margin-top: 2rem;">
