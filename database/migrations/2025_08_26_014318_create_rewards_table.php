@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('reward_id')->unique(); // "stk-phao", "bd-hero", "bg-ocean"
             $table->string('name'); // "Phao cứu hộ"
             $table->string('emoji'); // "🛟"
-            $table->string('type'); // "sticker", "badge", "background"
+            $table->string('type'); // "sticker", "badge"
             $table->integer('points'); // 10, 15, 20...
             $table->text('description')->nullable();
             $table->boolean('is_active')->default(true);

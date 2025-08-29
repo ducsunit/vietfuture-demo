@@ -59,7 +59,7 @@ Route::get('/api/rewards', [App\Http\Controllers\RewardController::class, 'index
 Route::get('/api/rewards/user', [App\Http\Controllers\RewardController::class, 'getUserRewards'])->name('api.rewards.user');
 Route::post('/api/rewards/purchase', [App\Http\Controllers\RewardController::class, 'purchase'])->name('api.rewards.purchase');
 Route::post('/api/rewards/equip', [App\Http\Controllers\RewardController::class, 'equip'])->name('api.rewards.equip');
-Route::get('/api/rewards/background', [App\Http\Controllers\RewardController::class, 'getEquippedBackground'])->name('api.rewards.background');
+
 Route::get('/api/rewards/badge', [App\Http\Controllers\RewardController::class, 'getEquippedBadge'])->name('api.rewards.badge');
 
 Route::post('/api/add-points', function (\Illuminate\Http\Request $request) {
@@ -103,6 +103,41 @@ Route::get('/api/get-display-name', function () {
     return response()->json(['ok' => true, 'display_name' => $user->display_name]);
 })->name('api.getDisplayName');
 
+// Leaderboard API
+Route::get('/api/leaderboard', function () {
+    try {
+        $leaderboard = App\Models\User::select('users.*')
+            ->selectRaw('COUNT(DISTINCT pr.lesson) as total_lessons')
+            ->selectRaw('COUNT(DISTINCT pr.kid_id) as total_kids')
+            ->leftJoin('progress_records as pr', 'users.id', '=', 'pr.user_id')
+            ->where('users.point', '>', 0)
+            ->groupBy('users.id', 'users.username', 'users.password', 'users.age', 'users.role', 'users.point', 'users.display_name', 'users.created_at', 'users.updated_at')
+            ->orderBy('users.point', 'desc')
+            ->orderBy('total_lessons', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'username' => $user->username,
+                    'display_name' => $user->display_name,
+                    'point' => (int) $user->point,
+                    'total_lessons' => (int) $user->total_lessons,
+                    'total_kids' => (int) $user->total_kids,
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'leaderboard' => $leaderboard
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Không thể tải bảng xếp hạng: ' . $e->getMessage()
+        ], 500);
+    }
+})->name('api.leaderboard');
 
 
 // Parent dashboard

@@ -113,55 +113,7 @@ class RewardSeeder extends Seeder
                 'description' => 'Huy hiệu dành cho nhà vô địch'
             ],
 
-            // Backgrounds
-            [
-                'reward_id' => 'bg-ocean',
-                'name' => 'Nền đại dương',
-                'emoji' => '🌊',
-                'type' => Reward::TYPE_BACKGROUND,
-                'points' => 35,
-                'description' => 'Nền đại dương xanh biếc'
-            ],
-            [
-                'reward_id' => 'bg-beach',
-                'name' => 'Nền bãi biển',
-                'emoji' => '🏖️',
-                'type' => Reward::TYPE_BACKGROUND,
-                'points' => 45,
-                'description' => 'Nền bãi biển tuyệt đẹp'
-            ],
-            [
-                'reward_id' => 'bg-coral',
-                'name' => 'Nền san hô',
-                'emoji' => '🪸',
-                'type' => Reward::TYPE_BACKGROUND,
-                'points' => 55,
-                'description' => 'Nền rạn san hô đầy màu sắc'
-            ],
-            [
-                'reward_id' => 'bg-sunset',
-                'name' => 'Nền hoàng hôn biển',
-                'emoji' => '🌅',
-                'type' => Reward::TYPE_BACKGROUND,
-                'points' => 65,
-                'description' => 'Nền hoàng hôn trên biển lãng mạn'
-            ],
-            [
-                'reward_id' => 'bg-underwater',
-                'name' => 'Nền dưới đáy biển',
-                'emoji' => '🫧',
-                'type' => Reward::TYPE_BACKGROUND,
-                'points' => 75,
-                'description' => 'Nền thế giới dưới đáy biển huyền bí'
-            ],
-            [
-                'reward_id' => 'bg-island',
-                'name' => 'Nền đảo nhiệt đới',
-                'emoji' => '🏝️',
-                'type' => Reward::TYPE_BACKGROUND,
-                'points' => 85,
-                'description' => 'Nền đảo nhiệt đới xinh đẹp'
-            ],
+
         ];
 
         foreach ($rewards as $reward) {

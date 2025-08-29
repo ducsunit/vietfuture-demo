@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('reward_id')->constrained()->onDelete('cascade');
             $table->timestamp('purchased_at')->useCurrent();
-            $table->boolean('is_equipped')->default(false); // For backgrounds/avatars
+            $table->boolean('is_equipped')->default(false); // For badges
             $table->timestamps();
             
             // Unique constraint to prevent duplicate purchases

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\RequestLogin;
+use App\Http\Requests\RequestRegister;
 
 class AuthController extends Controller
 {
@@ -24,15 +26,9 @@ class AuthController extends Controller
         ]);
     }
 
-    public function register(Request $request)
+    public function register(RequestRegister $request)
     {
-        $data = $request->validate([
-            'username' => 'required|string|min:3|max:50|unique:users,username',
-            'password' => 'required|string|min:6|max:100',
-            'age' => 'required|string|max:20',
-        ]);
-        if (!isset($data['role'])) $data['role'] = 0;
-        $user = User::create($data);
+        $user = User::create($request->all());
         session(['user_id' => $user->id, 'username' => $user->username, 'point' => (int) $user->point]);
         if ((int) $user->role === 1) {
             return redirect()->route('admin.books.index');
@@ -41,14 +37,10 @@ class AuthController extends Controller
         return redirect($redirect);
     }
 
-    public function login(Request $request)
+    public function login(RequestLogin $request)
     {
-        $data = $request->validate([
-            'username' => 'required|string',
-            'password' => 'required|string',
-        ]);
-        $user = User::where('username', $data['username'])->first();
-        if (!$user || !Hash::check($data['password'], $user->password)) {
+        $user = User::where('username', $request->input('username'))->first();
+        if (!$user || !Hash::check($request->input('password'), $user->password)) {
             return back()->withErrors(['username' => 'Sai tài khoản hoặc mật khẩu.'])->withInput();
         }
         session(['user_id' => $user->id, 'username' => $user->username, 'point' => (int) $user->point]);

@@ -60,20 +60,15 @@ class User extends Model
         })->exists();
     }
 
-    public function getEquippedBackground()
-    {
-        return $this->userRewards()
-            ->equipped()
-            ->byType(Reward::TYPE_BACKGROUND)
-            ->with('reward')
-            ->first();
-    }
+
 
     public function getEquippedBadge()
     {
         return $this->userRewards()
             ->equipped()
-            ->byType(Reward::TYPE_BADGE)
+            ->whereHas('reward', function ($q) {
+                $q->where('type', Reward::TYPE_BADGE);
+            })
             ->with('reward')
             ->first();
     }
@@ -82,7 +77,9 @@ class User extends Model
     {
         return $this->userRewards()
             ->equipped()
-            ->byType(Reward::TYPE_BADGE)
+            ->whereHas('reward', function ($q) {
+                $q->where('type', Reward::TYPE_BADGE);
+            })
             ->with('reward')
             ->get();
     }

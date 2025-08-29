@@ -135,7 +135,7 @@ class RewardController extends Controller
     }
 
     /**
-     * Equip/unequip a reward (supports backgrounds and badges)
+     * Equip/unequip a reward (supports badges)
      */
     public function equip(Request $request): JsonResponse
     {
@@ -178,35 +178,7 @@ class RewardController extends Controller
         ]);
     }
 
-    /**
-     * Get user's equipped background for applying to interface
-     */
-    public function getEquippedBackground(Request $request): JsonResponse
-    {
-        $userId = session('user_id');
-        if (!$userId) {
-            return response()->json(['background' => null]);
-        }
 
-        $user = User::find($userId);
-        if (!$user) {
-            return response()->json(['background' => null]);
-        }
-
-        $equippedBackground = $user->getEquippedBackground();
-
-        if ($equippedBackground) {
-            return response()->json([
-                'background' => [
-                    'id' => $equippedBackground->reward->reward_id,
-                    'name' => $equippedBackground->reward->name,
-                    'emoji' => $equippedBackground->reward->emoji,
-                ]
-            ]);
-        }
-
-        return response()->json(['background' => null]);
-    }
 
     /**
      * Get user's equipped badges for display next to names

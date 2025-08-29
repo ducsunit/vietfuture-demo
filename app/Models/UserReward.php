@@ -38,25 +38,13 @@ class UserReward extends Model
         return $query->where('is_equipped', true);
     }
 
-    public function scopeByType($query, $type)
-    {
-        return $query->whereHas('reward', function ($q) use ($type) {
-            $q->where('type', $type);
-        });
-    }
+
 
     // Helper methods
     public function equip()
     {
         // Unequip other items of the same type for this user (exclusive per type)
-        // Backgrounds remain exclusive; badges can be equipped in multiples
-        if ($this->reward->type === Reward::TYPE_BACKGROUND) {
-            self::where('user_id', $this->user_id)
-                ->byType(Reward::TYPE_BACKGROUND)
-                ->where('id', '!=', $this->id)
-                ->update(['is_equipped' => false]);
-        }
-
+        // Badges can be equipped in multiples
         $this->update(['is_equipped' => true]);
     }
 

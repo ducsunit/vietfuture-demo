@@ -27,7 +27,6 @@ class Reward extends Model
     // Define reward types
     const TYPE_STICKER = 'sticker';
     const TYPE_BADGE = 'badge';
-    const TYPE_BACKGROUND = 'background';
 
     // Relationships
     public function userRewards()
@@ -61,10 +60,7 @@ class Reward extends Model
         return $query->byType(self::TYPE_BADGE);
     }
 
-    public function scopeBackgrounds($query)
-    {
-        return $query->byType(self::TYPE_BACKGROUND);
-    }
+
 
     // Helper methods
     public function isOwnedByUser($userId)

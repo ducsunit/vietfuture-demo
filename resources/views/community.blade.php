@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>🌍 Cộng Đồng Kỹ Năng Sống - VietFuture</title>
+    <title>The Living Books</title>
     <meta name="csrf-token" content="{{ csrf_token() }}" />
 
     <!-- Google Fonts -->
@@ -14,8 +14,10 @@
         href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
         rel="stylesheet">
 
+    <link rel="stylesheet" href="{{ asset('css/child-friendly-colors.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/quiz.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/navigation.css') }}" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -28,7 +30,7 @@
                         <path d="M20 22V8a2 2 0 0 0-2-2h-7l-2-2H6a2 2 0 0 0-2 2v12" />
                     </svg>
                 </div>
-                <h1 class="logo-text">🌍 VietFuture Community</h1>
+                <h1 class="logo-text">The Living Books</h1>
             </div>
 
             @if (session('user_id'))
@@ -45,14 +47,14 @@
                         <span class="nav-emoji">💬</span>
                         <span>Cộng đồng</span>
                     </a>
-                    <a href="#" onclick="alert('Cửa hàng chỉ có trong trang Quiz')" class="nav-link disabled">
+                    <button onclick="showRewardShop()" class="nav-link ">
                         <span class="nav-emoji">🛍️</span>
                         <span>Cửa hàng</span>
-                    </a>
-                    <a href="#" onclick="alert('Bộ sưu tập chỉ có trong trang Quiz')" class="nav-link disabled">
+                    </button>
+                    <button onclick="showCollection()" class="nav-link ">
                         <span class="nav-emoji">📚</span>
                         <span>Bộ sưu tập</span>
-                    </a>
+                    </button>
                 </nav>
 
                 <div class="user-section">
@@ -72,6 +74,8 @@
         </div>
     </header>
     <main class="wrap">
+        <div id="view" style="display: none;"></div>
+        <div id="community-content">
         <div class="card">
             <h2>✍️ Chia sẻ cách dạy kỹ năng sống</h2>
             <form method="POST" action="{{ route('community.create') }}">
@@ -133,7 +137,7 @@
                 <div class="notice">Chưa có bài viết nào. Hãy là người đầu tiên!</div>
             @endforelse
         </div>
-
+        </div>
 
     </main>
     @if (session('user_id'))
@@ -178,7 +182,35 @@
                     });
                 }
             })();
+
+            // Add back button functionality
+            window.showCommunity = function() {
+                document.getElementById('view').style.display = 'none';
+                document.getElementById('community-content').style.display = 'block';
+            };
+
+            // Override showRewardShop and showCollection functions after quiz.js loads
+            setTimeout(() => {
+                if (window.showRewardShop) {
+                    const originalShowRewardShop = window.showRewardShop;
+                    window.showRewardShop = async function() {
+                        document.getElementById('community-content').style.display = 'none';
+                        document.getElementById('view').style.display = 'block';
+                        await originalShowRewardShop();
+                    };
+                }
+
+                if (window.showCollection) {
+                    const originalShowCollection = window.showCollection;
+                    window.showCollection = async function() {
+                        document.getElementById('community-content').style.display = 'none';
+                        document.getElementById('view').style.display = 'block';
+                        await originalShowCollection();
+                    };
+                }
+            }, 100);
         </script>
+        <script src="{{ asset('js/quiz.js') }}"></script>
     @else
         <script>
             // Guest user - sử dụng tên mặc định

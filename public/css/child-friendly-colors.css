@@ -1,0 +1,156 @@
+/* Child-Friendly Color Palette (5-12 years old) */
+:root {
+    /* Primary Colors */
+    --dark-gray: #333333;        /* Xám đậm - Text chính */
+    --light-cream: #FFF8E7;      /* Kem nhạt - Background chính */
+    --white: #FFFFFF;            /* Trắng - Background phụ */
+    
+    /* Vibrant Colors */
+    --turquoise: #4ECDC4;        /* Xanh ngọc - Accent chính */
+    --coral-red: #FF6B6B;        /* Đỏ san hô - Primary action */
+    --pastel-purple: #9D79BC;    /* Tím pastel - Secondary action */
+    --light-green: #6BCB77;      /* Xanh lá non - Success */
+    --strawberry-pink: #FF6F91;  /* Hồng dâu - Accent phụ */
+    --bright-orange: #FF9F45;    /* Cam sáng - Warning/Highlight */
+    --vivid-yellow: #FFD93D;     /* Vàng tươi - Border/Accent */
+    --sky-blue: #4AA9E9;         /* Xanh da trời - Info */
+    
+    /* Semantic Colors */
+    --success: var(--light-green);
+    --warning: var(--bright-orange);
+    --error: var(--coral-red);
+    --info: var(--sky-blue);
+    --primary: var(--coral-red);
+    --secondary: var(--pastel-purple);
+    --accent: var(--turquoise);
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, var(--coral-red), var(--bright-orange));
+    --gradient-secondary: linear-gradient(135deg, var(--pastel-purple), var(--strawberry-pink));
+    --gradient-success: linear-gradient(135deg, var(--light-green), var(--turquoise));
+    --gradient-accent: linear-gradient(135deg, var(--turquoise), var(--sky-blue));
+    --gradient-background: linear-gradient(135deg, var(--sky-blue) 0%, var(--turquoise) 50%, var(--light-green) 100%);
+    --gradient-card: linear-gradient(135deg, var(--white) 0%, var(--light-cream) 100%);
+    
+    /* Rainbow Gradient for Animations */
+    --gradient-rainbow: linear-gradient(90deg, 
+        var(--coral-red), 
+        var(--bright-orange), 
+        var(--vivid-yellow), 
+        var(--light-green), 
+        var(--turquoise), 
+        var(--sky-blue), 
+        var(--pastel-purple), 
+        var(--strawberry-pink)
+    );
+    
+    /* Shadows */
+    --shadow-primary: 0 6px 20px rgba(255, 107, 107, 0.3);
+    --shadow-secondary: 0 6px 20px rgba(157, 121, 188, 0.3);
+    --shadow-success: 0 6px 20px rgba(107, 203, 119, 0.3);
+    --shadow-accent: 0 6px 20px rgba(78, 205, 196, 0.3);
+    
+    /* Hover Shadows */
+    --shadow-primary-hover: 0 10px 30px rgba(255, 107, 107, 0.35);
+    --shadow-secondary-hover: 0 10px 30px rgba(157, 121, 188, 0.35);
+    --shadow-success-hover: 0 10px 30px rgba(107, 203, 119, 0.35);
+    --shadow-accent-hover: 0 10px 30px rgba(78, 205, 196, 0.35);
+}
+
+/* Utility Classes */
+.text-primary { color: var(--primary); }
+.text-secondary { color: var(--secondary); }
+.text-success { color: var(--success); }
+.text-warning { color: var(--warning); }
+.text-error { color: var(--error); }
+.text-info { color: var(--info); }
+.text-accent { color: var(--accent); }
+
+.bg-primary { background-color: var(--primary); }
+.bg-secondary { background-color: var(--secondary); }
+.bg-success { background-color: var(--success); }
+.bg-warning { background-color: var(--warning); }
+.bg-error { background-color: var(--error); }
+.bg-info { background-color: var(--info); }
+.bg-accent { background-color: var(--accent); }
+.bg-cream { background-color: var(--light-cream); }
+
+.border-primary { border-color: var(--primary); }
+.border-secondary { border-color: var(--secondary); }
+.border-success { border-color: var(--success); }
+.border-warning { border-color: var(--warning); }
+.border-error { border-color: var(--error); }
+.border-accent { border-color: var(--accent); }
+.border-yellow { border-color: var(--vivid-yellow); }
+
+/* Animation Keyframes */
+@keyframes rainbow-flow {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+@keyframes bounce-gentle {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+@keyframes pulse-soft {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+    }
+}
+
+/* Interactive Elements */
+.interactive {
+    transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.interactive:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-primary);
+}
+
+/* Success Animation */
+@keyframes success-celebration {
+    0% {
+        transform: scale(1) rotate(0deg);
+    }
+    25% {
+        transform: scale(1.1) rotate(5deg);
+    }
+    50% {
+        transform: scale(1.05) rotate(-3deg);
+    }
+    75% {
+        transform: scale(1.1) rotate(3deg);
+    }
+    100% {
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+/* Error Animation */
+@keyframes error-shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-5px);
+    }
+    75% {
+        transform: translateX(5px);
+    }
+}

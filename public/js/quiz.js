@@ -186,7 +186,6 @@ function getQuiz() {
 let REWARDS = {
     sticker: [],
     badge: [],
-    background: [],
 };
 
 let current = 0;
@@ -201,7 +200,6 @@ let userPoints = 0;
 let userOwnedRewards = {
     sticker: [],
     badge: [],
-    background: [],
 };
 
 function render() {
@@ -325,7 +323,10 @@ async function equipBadge(rewardId) {
                 confirmButtonText: "OK",
                 timer: 2000,
             });
-            showCollection();
+            // Refresh collection if we're in collection view
+            if (typeof showCollection === 'function') {
+                showCollection();
+            }
         } else {
             await Swal.fire({
                 title: "❌ Lỗi",
@@ -373,7 +374,10 @@ async function unequipBadge(rewardId) {
                 confirmButtonText: "OK",
                 timer: 2000,
             });
-            showCollection();
+            // Refresh collection if we're in collection view
+            if (typeof showCollection === 'function') {
+                showCollection();
+            }
         } else {
             await Swal.fire({
                 title: "❌ Lỗi",
@@ -393,288 +397,15 @@ async function unequipBadge(rewardId) {
     }
 }
 
-// Hàm trang bị nền
-async function equipBackground(rewardId) {
-    try {
-        const response = await fetch("/api/rewards/equip", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-TOKEN":
-                    document
-                        .querySelector('meta[name="csrf-token"]')
-                        ?.getAttribute("content") || "",
-                Accept: "application/json",
-            },
-            body: JSON.stringify({
-                reward_id: rewardId,
-                action: "equip",
-            }),
-        });
 
-        const result = await response.json();
 
-        if (result.success) {
-            await Swal.fire({
-                title: "✅ Đã trang bị!",
-                text: result.message,
-                icon: "success",
-                confirmButtonText: "OK",
-                timer: 2000,
-            });
 
-            // Apply background immediately
-            applyEquippedBackground();
-        } else {
-            await Swal.fire({
-                title: "❌ Lỗi",
-                text: result.error || "Không thể trang bị",
-                icon: "error",
-                confirmButtonText: "OK",
-            });
-        }
-    } catch (error) {
-        console.error("Error equipping background:", error);
-        await Swal.fire({
-            title: "❌ Lỗi",
-            text: "Không thể kết nối đến server",
-            icon: "error",
-            confirmButtonText: "OK",
-        });
-    }
-}
 
-// Hàm áp dụng nền đã trang bị
-async function applyEquippedBackground() {
-    try {
-        const response = await fetch("/api/rewards/background");
-        const data = await response.json();
 
-        if (data.background) {
-            // Apply background based on the reward ID
-            const body = document.body;
-            const backgroundId = data.background.id;
 
-            // Remove existing background classes
-            body.classList.remove(
-                "bg-ocean",
-                "bg-beach",
-                "bg-coral",
-                "bg-sunset",
-                "bg-underwater",
-                "bg-island"
-            );
 
-            // Apply background styles
-            applyBackgroundStyles(backgroundId, data.background.emoji);
-        }
-    } catch (error) {
-        console.error("Error applying background:", error);
-    }
-}
 
-// Hàm áp dụng styles cho background
-function applyBackgroundStyles(backgroundId, emoji) {
-    const existingStyle = document.getElementById("dynamic-background-style");
-    if (existingStyle) {
-        existingStyle.remove();
-    }
 
-    const style = document.createElement("style");
-    style.id = "dynamic-background-style";
-
-    let backgroundCSS = "";
-
-    switch (backgroundId) {
-        case "bg-ocean":
-            backgroundCSS = `
-        body::after {
-          content: '${emoji}';
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 50%, #0369a1 100%);
-          z-index: -1;
-          font-size: 100px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          opacity: 0.1;
-          pointer-events: none;
-        }
-      `;
-            break;
-        case "bg-beach":
-            backgroundCSS = `
-        body::after {
-          content: '${emoji}';
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(135deg, #f59e0b 0%, #f97316 50%, #ea580c 100%);
-          z-index: -1;
-          font-size: 100px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          opacity: 0.1;
-          pointer-events: none;
-        }
-      `;
-            break;
-        case "bg-coral":
-            backgroundCSS = `
-        body::after {
-          content: '${emoji}';
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(135deg, #ec4899 0%, #f43f5e 50%, #e11d48 100%);
-          z-index: -1;
-          font-size: 100px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          opacity: 0.1;
-          pointer-events: none;
-        }
-      `;
-            break;
-        case "bg-sunset":
-            backgroundCSS = `
-        body::after {
-          content: '${emoji}';
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(135deg, #f97316 0%, #fb923c 25%, #fbbf24 50%, #f59e0b 75%, #f97316 100%);
-          z-index: -1;
-          font-size: 100px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          opacity: 0.1;
-          pointer-events: none;
-        }
-      `;
-            break;
-        case "bg-underwater":
-            backgroundCSS = `
-        body::after {
-          content: '${emoji}';
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 25%, #2563eb 50%, #3b82f6 75%, #60a5fa 100%);
-          z-index: -1;
-          font-size: 100px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          opacity: 0.1;
-          pointer-events: none;
-        }
-      `;
-            break;
-        case "bg-island":
-            backgroundCSS = `
-        body::after {
-          content: '${emoji}';
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(135deg, #10b981 0%, #059669 25%, #047857 50%, #065f46 75%, #064e3b 100%);
-          z-index: -1;
-          font-size: 100px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          opacity: 0.1;
-          pointer-events: none;
-        }
-      `;
-            break;
-    }
-
-    style.textContent = backgroundCSS;
-    document.head.appendChild(style);
-}
-
-// Hàm gỡ bỏ nền
-async function unequipBackground(rewardId) {
-    try {
-        const response = await fetch("/api/rewards/equip", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-TOKEN":
-                    document
-                        .querySelector('meta[name="csrf-token"]')
-                        ?.getAttribute("content") || "",
-                Accept: "application/json",
-            },
-            body: JSON.stringify({
-                reward_id: rewardId,
-                action: "unequip",
-            }),
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            await Swal.fire({
-                title: "✅ Đã gỡ bỏ!",
-                text: result.message,
-                icon: "success",
-                confirmButtonText: "OK",
-                timer: 2000,
-            });
-
-            // Remove background
-            const existingStyle = document.getElementById(
-                "dynamic-background-style"
-            );
-            if (existingStyle) {
-                existingStyle.remove();
-            }
-
-            // Refresh collection
-            showCollection();
-        } else {
-            await Swal.fire({
-                title: "❌ Lỗi",
-                text: result.error || "Không thể gỡ bỏ",
-                icon: "error",
-                confirmButtonText: "OK",
-            });
-        }
-    } catch (error) {
-        console.error("Error unequipping background:", error);
-        await Swal.fire({
-            title: "❌ Lỗi",
-            text: "Không thể kết nối đến server",
-            icon: "error",
-            confirmButtonText: "OK",
-        });
-    }
-}
-
-// Auto-apply equipped background on page load
-document.addEventListener("DOMContentLoaded", function () {
-    applyEquippedBackground();
-});
 
 function renderOrder(q) {
     const zone = $("#zone");
@@ -1026,32 +757,13 @@ async function showRewardShop() {
         }
         html += `</div>`;
 
-        // Phần Backgrounds
-        html += `<h3 style='margin:24px 0 16px 0; color:#374151;'>🖼️ Nền tùy chỉnh</h3>`;
-        html += `<div style='display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:32px;'>`;
-        if (REWARDS.background) {
-            REWARDS.background.forEach((bg) => {
-                const isOwned = bg.is_owned;
-                const canAfford = bg.can_afford;
-                html += `<div style='border:2px solid ${
-                    isOwned ? "#8b5cf6" : "#e5e7eb"
-                }; border-radius:12px; padding:16px; background:${
-                    isOwned ? "#f3f4f6" : "#f9fafb"
-                }; text-align:center;'>`;
-                html += `<div style='font-size:32px; margin-bottom:8px;'>${bg.emoji}</div>`;
-                html += `<div style='font-weight:600; margin-bottom:4px;'>${bg.name}</div>`;
-                html += `<div style='color:#6b7280; font-size:14px; margin-bottom:12px;'>${bg.points} điểm</div>`;
-                if (isOwned) {
-                    html += `<div style='color:#7c3aed; font-weight:600;'>✅ Đã sở hữu</div>`;
-                    html += `<button class='btn btn-secondary' style='width:100%; margin-top:8px;' onclick='equipBackground("${bg.id}")'>Trang bị</button>`;
-                } else if (canAfford) {
-                    html += `<button class='btn btn-primary' style='width:100%;' onclick='buyReward("${bg.id}")'>Mua ngay</button>`;
-                } else {
-                    html += `<div style='color:#ef4444; font-weight:600;'>❌ Không đủ điểm</div>`;
-                }
-                html += `</div>`;
-            });
-        }
+
+
+        // Thêm nút quay lại
+        html += `<div style='margin-top: 32px; text-align: center;'>`;
+        html += `<button class='btn btn-secondary' onclick='goBack()' style='padding: 12px 24px; font-size: 16px;'>`;
+        html += `⬅️ Quay lại`;
+        html += `</button>`;
         html += `</div>`;
 
         html += `</div>`;
@@ -1128,7 +840,6 @@ async function showCollection() {
         userOwnedRewards = data.rewards || {
             sticker: [],
             badge: [],
-            background: [],
         };
         userPoints = data.user_points;
 
@@ -1137,7 +848,6 @@ async function showCollection() {
         // Thống kê tổng quan
         const totalStickers = userOwnedRewards.sticker?.length || 0;
         const totalBadges = userOwnedRewards.badge?.length || 0;
-        const totalBackgrounds = userOwnedRewards.background?.length || 0;
 
         html += `<div style='background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:16px; margin-bottom:24px;'>`;
         html += `<h3 style='margin:0 0 12px 0; color:#374151;'>📊 Thống kê</h3>`;
@@ -1149,10 +859,6 @@ async function showCollection() {
         html += `<div style='text-align:center; padding:12px; background:#fffbeb; border-radius:8px;'>`;
         html += `<div style='font-size:24px; font-weight:bold; color:#d97706;'>${totalBadges}</div>`;
         html += `<div style='color:#b45309; font-size:14px;'>Huy hiệu</div>`;
-        html += `</div>`;
-        html += `<div style='text-align:center; padding:12px; background:#f3f4f6; border-radius:8px;'>`;
-        html += `<div style='font-size:24px; font-weight:bold; color:#7c3aed;'>${totalBackgrounds}</div>`;
-        html += `<div style='color:#6d28d9; font-size:14px;'>Nền giao diện</div>`;
         html += `</div>`;
         html += `</div>`;
         html += `</div>`;
@@ -1195,36 +901,12 @@ async function showCollection() {
             html += `</div>`;
         }
 
-        // Phần Backgrounds đã sở hữu
-        if (
-            userOwnedRewards.background &&
-            userOwnedRewards.background.length > 0
-        ) {
-            html += `<h3 style='margin:24px 0 16px 0; color:#374151;'>🎨 Nền giao diện của bạn</h3>`;
-            html += `<div style='display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-bottom:32px; align-items:stretch;'>`;
-            userOwnedRewards.background.forEach((bg) => {
-                html += `<div style='border:2px solid #8b5cf6; border-radius:12px; padding:16px; background:#f3f4f6; text-align:center; display:flex; flex-direction:column; min-height:260px;'>`;
-                html += `<div style='font-size:36px; min-height:48px; display:flex; align-items:center; justify-content:center; margin-bottom:8px;'>${bg.emoji}</div>`;
-                html += `<div style='font-weight:600; color:#7c3aed; margin-bottom:8px;'>${bg.name}</div>`;
-                if (bg.is_equipped) {
-                    html += `<div style='color:#059669; font-weight:600; margin-bottom:8px;'>✅ Đang sử dụng</div>`;
-                    html += `<button class='btn btn-secondary' style='width:100%; margin-top:auto;' onclick='unequipBackground("${bg.id}")'>Gỡ bỏ</button>`;
-                } else {
-                    html += `<button class='btn btn-primary' style='width:100%; margin-top:auto;' onclick='equipBackground("${bg.id}")'>Trang bị</button>`;
-                }
-                html += `<div style='font-size:12px; color:#6b7280; margin-top:auto;'>Mua ngày ${new Date(
-                    bg.purchased_at
-                ).toLocaleDateString("vi-VN")}</div>`;
-                html += `</div>`;
-            });
-            html += `</div>`;
-        }
+
 
         // Thông báo nếu chưa có gì
         if (
             totalStickers === 0 &&
-            totalBadges === 0 &&
-            totalBackgrounds === 0
+            totalBadges === 0
         ) {
             html += `<div style='text-align:center; padding:40px; color:#6b7280;'>`;
             html += `<div style='font-size:48px; margin-bottom:16px;'>📦</div>`;
@@ -1233,8 +915,12 @@ async function showCollection() {
             html += `</div>`;
         }
 
-        // Nút quay lại cửa hàng
-        html += `<div class='foot'><button class='btn btn-ghost' onclick='showRewardShop()'>◀ Quay lại cửa hàng</button></div>`;
+        // Thêm nút quay lại
+        html += `<div style='margin-top: 32px; text-align: center;'>`;
+        html += `<button class='btn btn-secondary' onclick='goBack()' style='padding: 12px 24px; font-size: 16px;'>`;
+        html += `⬅️ Quay lại`;
+        html += `</button>`;
+        html += `</div>`;
         html += `</div>`;
 
         root.innerHTML = html;
@@ -1255,6 +941,21 @@ function updateHeaderPoints() {
         kidTag.textContent = `• ${userPoints} điểm`;
     }
 }
+
+// Function để quay lại trang chính
+function goBack() {
+    // Kiểm tra xem đang ở trang nào và quay lại trang tương ứng
+    if (window.showDashboard) {
+        window.showDashboard();
+    } else if (window.showCommunity) {
+        window.showCommunity();
+    } else {
+        // Fallback: quay lại trang quiz
+        window.location.href = '/quiz';
+    }
+}
+
+
 
 window.addEventListener("hashchange", render);
 updateHeaderPoints();

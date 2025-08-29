@@ -95,7 +95,26 @@ class DemoController extends Controller
                 ];
             });
 
-        return view('parent', ['records' => $records]);
+        // Tính toán thống kê chi tiết
+        $stats = [
+            'total_records' => ProgressRecord::count(),
+            'total_users' => User::where('point', '>', 0)->count(),
+            'avg_score' => ProgressRecord::avg('score'),
+            'top_score' => ProgressRecord::max('score'),
+            'recent_activity' => ProgressRecord::where('created_at', '>=', now()->subDays(7))->count(),
+            'popular_lessons' => ProgressRecord::selectRaw('lesson, COUNT(*) as count')
+                ->groupBy('lesson')
+                ->orderBy('count', 'desc')
+                ->limit(5)
+                ->get()
+                ->pluck('count', 'lesson')
+                ->toArray(),
+        ];
+
+        return view('parent', [
+            'records' => $records,
+            'stats' => $stats
+        ]);
     }
 
     public function communityIndex()

@@ -12,8 +12,8 @@ body {
     margin: 0;
     font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto,
         Helvetica, Arial, sans-serif;
-    background: linear-gradient(135deg, #00a9ff 0%, #a0e9ff 50%, #cdf5fd 100%);
-    color: #1a202c;
+    background: var(--gradient-background);
+    color: var(--dark-gray);
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     font-weight: 400;
     line-height: 1.6;
@@ -33,7 +33,7 @@ header {
     max-width: 900px;
     margin: 2rem auto;
     padding: 0;
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 248, 231, 0.95);
     backdrop-filter: blur(20px);
     border-radius: 25px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
@@ -58,8 +58,8 @@ main {
 }
 
 .card {
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-    border: 3px solid #e2e8f0;
+    background: var(--gradient-card);
+    border: 3px solid var(--vivid-yellow);
     border-radius: 20px;
     padding: 2rem;
     margin-bottom: var(--gap);
@@ -76,9 +76,9 @@ main {
     left: 0;
     right: 0;
     height: 5px;
-    background: linear-gradient(90deg, #00a9ff, #89cff3, #a0e9ff, #cdf5fd);
+    background: var(--gradient-rainbow);
     background-size: 300% 100%;
-    animation: rainbow 3s ease-in-out infinite;
+    animation: rainbow-flow 3s ease-in-out infinite;
 }
 
 @keyframes rainbow {
@@ -94,7 +94,7 @@ main {
 .card:hover {
     transform: translateY(-5px);
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-    border-color: #00a9ff;
+    border-color: var(--coral-red);
 }
 
 .btn {
@@ -133,26 +133,37 @@ main {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #00a9ff, #89cff3);
+    background: var(--gradient-primary);
     color: white;
-    box-shadow: 0 6px 20px rgba(0, 169, 255, 0.3);
+    box-shadow: var(--shadow-primary);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(0, 169, 255, 0.35);
+    box-shadow: var(--shadow-primary-hover);
 }
 
 .btn-ghost {
     background: rgba(255, 255, 255, 0.9);
-    color: #00a9ff;
-    border: 2px solid #00a9ff;
+    color: var(--turquoise);
+    border: 2px solid var(--turquoise);
 }
 
 .btn-ghost:hover {
-    background: #00a9ff;
+    background: var(--turquoise);
     color: white;
     transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: var(--gradient-secondary);
+    color: white;
+    box-shadow: var(--shadow-secondary);
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-secondary-hover);
 }
 
 .btn:disabled {
@@ -167,8 +178,8 @@ main {
 }
 
 .choice {
-    background: rgba(255, 255, 255, 0.9);
-    border: 3px solid #e2e8f0;
+    background: rgba(255, 248, 231, 0.9);
+    border: 3px solid var(--vivid-yellow);
     border-radius: 15px;
     padding: 1rem 1.25rem;
     cursor: pointer;
@@ -183,30 +194,30 @@ main {
 }
 
 .choice:hover {
-    background: linear-gradient(135deg, #00a9ff, #89cff3);
+    background: var(--gradient-success);
     color: white;
     transform: translateX(5px);
-    box-shadow: 0 5px 20px rgba(0, 169, 255, 0.3);
+    box-shadow: var(--shadow-accent);
 }
 
 .choice[aria-selected="true"],
 .choice.selected {
-    background: linear-gradient(135deg, #00a9ff, #89cff3);
+    background: var(--gradient-success);
     color: white;
-    border-color: #00a9ff;
+    border-color: var(--turquoise);
     transform: translateX(5px);
 }
 
 .choice.correct {
-    background: linear-gradient(135deg, #00a9ff, #89cff3);
-    border-color: #00a9ff;
+    background: var(--gradient-success);
+    border-color: var(--light-green);
     color: white;
     animation: success-celebration 0.6s ease-out;
 }
 
 .choice.incorrect {
-    background: linear-gradient(135deg, #e74c3c, #c0392b);
-    border-color: #e74c3c;
+    background: var(--gradient-primary);
+    border-color: var(--coral-red);
     color: white;
     animation: error-shake 0.5s ease-in-out;
 }
@@ -371,3 +382,4 @@ textarea {
         Helvetica, Arial, sans-serif !important;
     line-height: 1.6 !important;
 }
+
