@@ -548,6 +548,23 @@
                 font-size: 12px;
             }
         }
+
+        /* Quiz Images */
+        .quiz-image,
+        .quiz-explain-image {
+            width: 100%;
+            max-width: 480px;
+            height: 260px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            display: inline-block;
+        }
+        .quiz-image-wrap,
+        .quiz-explain-image-wrap {
+            text-align: center;
+            margin: 0 0 12px 0;
+        }
     </style>
 </head>
 

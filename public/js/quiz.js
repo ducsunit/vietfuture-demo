@@ -175,11 +175,119 @@ async function loadLesson() {
 
 function getQuiz() {
     if (!LESSON) return { title: "Bài học", timeLimitSec: 90, questions: [] };
-    return {
-        title: LESSON.title || "Bài học",
+    
+    // Tạo quiz về kỹ năng cứu đuối và an toàn nước
+    const waterSafetyQuiz = {
+        title: "Bí kíp Số 12: Biết cách cứu người bị ngã xuống nước",
         timeLimitSec: 90,
-        questions: LESSON.questions || [],
+        questions: [
+            {
+                id: "q1",
+                type: "single",
+                text: "Khi gặp người bị đuối nước, điều quan trọng nhất cần làm đầu tiên là gì?",
+                options: [
+                    { id: "a1", text: "Nhảy ngay xuống nước để cứu", correct: false },
+                    { id: "a2", text: "Bình tĩnh đánh giá tình huống và lập kế hoạch cứu", correct: true },
+                    { id: "a3", text: "Hét to để thu hút sự chú ý", correct: false },
+                    { id: "a4", text: "Chạy đi tìm người lớn", correct: false }
+                ],
+                explain: "Việc giữ bình tĩnh và đánh giá tình huống là bước đầu tiên quan trọng nhất. Không nên vội vàng nhảy xuống nước mà không có kế hoạch."
+            },
+            {
+                id: "q2",
+                type: "single",
+                text: "Trong trường hợp nào bạn TUYỆT ĐỐI KHÔNG nên nhảy xuống nước để cứu người?",
+                options: [
+                    { id: "b1", text: "Khi bạn không biết bơi hoặc bơi không giỏi", correct: true },
+                    { id: "b2", text: "Khi nạn nhân là người thân", correct: false },
+                    { id: "b3", text: "Khi nước không quá sâu", correct: false },
+                    { id: "b4", text: "Khi có nhiều người xung quanh", correct: false }
+                ],
+                explain: "Tuyệt đối không nhảy xuống cứu nếu bản thân không bơi giỏi, không biết cách cứu đuối, và tự thấy trọng lượng của nạn nhân quá lớn so với sức lực và khả năng của mình."
+            },
+            {
+                id: "q3",
+                type: "single",
+                text: "Khi cứu người trong nước sâu, bạn nên tiếp cận nạn nhân từ hướng nào?",
+                options: [
+                    { id: "c1", text: "Từ phía trước mặt nạn nhân", correct: false },
+                    { id: "c2", text: "Từ phía sau lưng nạn nhân", correct: true },
+                    { id: "c3", text: "Từ bên cạnh nạn nhân", correct: false },
+                    { id: "c4", text: "Từ bất kỳ hướng nào", correct: false }
+                ],
+                explain: "Phải tiếp cận nạn nhân từ phía sau vì người đuối nước thường hoảng loạn và sẽ bám chặt lấy người cứu, có thể khiến cả hai cùng chìm."
+            },
+            {
+                id: "q4",
+                type: "single",
+                text: "Trước khi nhảy xuống nước cứu người, bạn nên chuẩn bị gì?",
+                options: [
+                    { id: "d1", text: "Cởi bỏ quần áo để bơi nhanh hơn", correct: false },
+                    { id: "d2", text: "Mặc áo phao hoặc mang theo phao cứu sinh", correct: true },
+                    { id: "d3", text: "Uống nhiều nước để có sức", correct: false },
+                    { id: "d4", text: "Không cần chuẩn bị gì", correct: false }
+                ],
+                explain: "Nên mặc áo phao hoặc mang theo phao cứu sinh vì phản ứng đầu tiên của người đuối nước là bám chặt, nên cần có vật nổi để đảm bảo an toàn cho cả hai."
+            },
+            {
+                id: "q5",
+                type: "order",
+                text: "Sắp xếp các bước cứu người đuối nước theo thứ tự đúng:",
+                items: [
+                    "Bình tĩnh đánh giá tình huống",
+                    "Tìm vật dụng cứu hộ (phao, dây, gậy)",
+                    "Tiếp cận nạn nhân từ phía sau",
+                    "Đưa nạn nhân lên bờ an toàn",
+                    "Thực hiện sơ cứu nếu cần"
+                ],
+                answer: [
+                    "Bình tĩnh đánh giá tình huống",
+                    "Tìm vật dụng cứu hộ (phao, dây, gậy)",
+                    "Tiếp cận nạn nhân từ phía sau",
+                    "Đưa nạn nhân lên bờ an toàn",
+                    "Thực hiện sơ cứu nếu cần"
+                ]
+            },
+            {
+                id: "q6",
+                type: "single",
+                text: "Khi cứu người trong nước sâu, phương pháp nào sau đây được khuyến nghị?",
+                options: [
+                    { id: "e1", text: "Nắm tóc và kéo nạn nhân trên mặt nước", correct: true },
+                    { id: "e2", text: "Ôm chặt nạn nhân để giữ ấm", correct: false },
+                    { id: "e3", text: "Để nạn nhân bám vào vai", correct: false },
+                    { id: "e4", text: "Kéo nạn nhân bằng chân", correct: false }
+                ],
+                explain: "Nắm tóc và kéo nạn nhân trên mặt nước là phương pháp an toàn, giữ cho mũi và miệng nạn nhân nhô lên khỏi mặt nước, đồng thời tránh bị nạn nhân bám chặt."
+            },
+            {
+                id: "q7",
+                type: "single",
+                text: "Trong trường hợp nước nông gần bờ, cách cứu nào an toàn nhất?",
+                options: [
+                    { id: "f1", text: "Nằm xuống bờ và đưa tay kéo nạn nhân", correct: true },
+                    { id: "f2", text: "Đứng trên bờ và cúi xuống kéo", correct: false },
+                    { id: "f3", text: "Nhảy xuống nước để đẩy nạn nhân lên", correct: false },
+                    { id: "f4", text: "Ném đá để nạn nhân bám vào", correct: false }
+                ],
+                explain: "Nằm xuống bờ và đưa tay kéo nạn nhân là cách an toàn nhất vì tránh được việc bị kéo xuống nước và có thể giữ thăng bằng tốt."
+            },
+            {
+                id: "q8",
+                type: "single",
+                text: "Khi không có phao cứu sinh, bạn có thể sử dụng vật dụng nào để cứu người?",
+                options: [
+                    { id: "g1", text: "Áo, khăn tắm, gậy dài", correct: true },
+                    { id: "g2", text: "Điện thoại di động", correct: false },
+                    { id: "g3", text: "Chìa khóa xe", correct: false },
+                    { id: "g4", text: "Tiền bạc", correct: false }
+                ],
+                explain: "Áo, khăn tắm, gậy dài đều có thể dùng làm vật dụng cứu hộ tạm thời để nạn nhân bám vào và được kéo lên bờ an toàn."
+            }
+        ]
     };
+    
+    return waterSafetyQuiz;
 }
 
 // Rewards data will be loaded from database
@@ -191,7 +299,7 @@ let REWARDS = {
 let current = 0;
 let selected = null;
 let orderWorking = [];
-let timeLeft = 0; // will derive from getQuiz()
+let timeLeft = 0; // seconds remaining for the current question
 let timerId = null;
 var answers = {};
 
@@ -221,7 +329,9 @@ function render() {
         return;
     }
     // derive timer on first render
-    if (!timeLeft) timeLeft = QUIZ.timeLimitSec || 90;
+    // Reset per-question timer
+    stopTimer();
+    timeLeft = getPerQuestionTimeSec();
     const q = QUIZ.questions[current];
     if (!q) return renderResult();
     const qType = String(
@@ -235,9 +345,10 @@ function render() {
           <div class="progress-bar">
             <div class="progress-fill" style="width: ${progressPercent}%"></div>
           </div>
-          <div class="progress-text">📚 ${prog} • ⏰ ${timeLeft}s</div>
+          <div class="progress-text">📚 ${prog} • ⏰ <span id="timeLeftText">${timeLeft}s</span></div>
         </div>
         <h2>🎯 ${q.text}</h2>
+        ${q.image ? `<div class="quiz-image-wrap"><img class="quiz-image" src="${q.image}" alt="question" loading="lazy"></div>` : ""}
         <div id="zone"></div>
         <div class="foot" style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
           <button class="btn btn-ghost" onclick="prevQ()" ${
@@ -258,6 +369,9 @@ function render() {
     $("#nextBtn").addEventListener("click", nextQ);
     if (qType === "single") renderSingle(q);
     if (qType === "order") renderOrder(q);
+
+    // Start countdown for this question
+    startQuestionTimer();
 }
 
 function renderSingle(q) {
@@ -441,10 +555,12 @@ function drawOrderList(zone, arr, q) {
 }
 
 function prevQ() {
+    stopTimer();
     current = Math.max(0, current - 1);
     render();
 }
 function nextQ() {
+    stopTimer();
     const QUIZ = getQuiz();
     const total =
         QUIZ && Array.isArray(QUIZ.questions) ? QUIZ.questions.length : 0;
@@ -459,7 +575,7 @@ function nextQ() {
 
 async function renderResult() {
     const QUIZ = getQuiz();
-    clearInterval(timerId);
+    stopTimer();
 
     // Tính điểm dựa trên kết quả
     let earnedPoints = 0;
@@ -504,7 +620,11 @@ async function renderResult() {
     html += `</div>`;
 
     QUIZ.questions.forEach((q) => {
-        html += `<div style='margin-bottom:32px; padding:20px; border:1px solid #e2e8f0; border-radius:12px; background:#fafbfc;'><p style='margin:0 0 16px 0; font-size:16px;'><b>${q.text}</b></p>`;
+        html += `<div style='margin-bottom:32px; padding:20px; border:1px solid #e2e8f0; border-radius:12px; background:#fafbfc;'>`;
+        html += `<p style='margin:0 0 16px 0; font-size:16px;'><b>${q.text}</b></p>`;
+        if (q.image) {
+            html += `<div class='quiz-image-wrap'><img class='quiz-image' src='${q.image}' alt='question' loading='lazy'></div>`;
+        }
         if (q.type === "single") {
             html += `<div style='display:grid; gap:12px; margin-bottom:16px;'>`;
             q.options.forEach((o) => {
@@ -536,6 +656,9 @@ async function renderResult() {
                     q.explain ||
                     "Hãy đọc kỹ câu hỏi và chọn đáp án phù hợp nhất."
                 }</p>`;
+                if (q.explain_image) {
+                    html += `<div class='quiz-explain-image-wrap' style='margin-top:8px;'><img class='quiz-explain-image' src='${q.explain_image}' alt='explain' loading='lazy'></div>`;
+                }
                 html += `</div>`;
             } else if (
                 answers[q.id] !== undefined &&
@@ -545,6 +668,9 @@ async function renderResult() {
                 html += `<p style='margin:0; color:#059669; font-weight:600;'>✅ Chính xác! ${
                     q.explain || "Bạn đã trả lời đúng."
                 }</p>`;
+                if (q.explain_image) {
+                    html += `<div class='quiz-explain-image-wrap' style='margin-top:8px;'><img class='quiz-explain-image' src='${q.explain_image}' alt='explain' loading='lazy'></div>`;
+                }
                 html += `</div>`;
             }
         }
@@ -623,6 +749,25 @@ async function renderResult() {
         const j = await r.json();
         if (typeof j.point === "number") userPoints = j.point;
         updateHeaderPoints();
+    } catch (e) {}
+
+    // Ask to redo the quiz using SweetAlert2
+    try {
+        if (window.Swal && typeof window.Swal.fire === "function") {
+            setTimeout(async () => {
+                const result = await Swal.fire({
+                    title: "Bạn có muốn làm lại bài không?",
+                    icon: "question",
+                    showCancelButton: true,
+                    confirmButtonText: "Làm lại",
+                    cancelButtonText: "Đóng",
+                });
+                if (result.isConfirmed) {
+                    // Simplest reset is reload
+                    location.reload();
+                }
+            }, 200);
+        }
     } catch (e) {}
 }
 
@@ -960,3 +1105,36 @@ function goBack() {
 window.addEventListener("hashchange", render);
 updateHeaderPoints();
 render();
+
+// ----------------- Timer helpers (per-question) -----------------
+function getPerQuestionTimeSec() {
+    // default 20s per question; could be adjusted or derived later
+    return 20;
+}
+
+function startQuestionTimer() {
+    const QUIZ = getQuiz();
+    const total = QUIZ.questions?.length || 0;
+    const isLast = current === total - 1;
+    const timeEl = document.getElementById("timeLeftText");
+    stopTimer();
+    timerId = setInterval(() => {
+        timeLeft = Math.max(0, (timeLeft || 0) - 1);
+        if (timeEl) timeEl.textContent = `${timeLeft}s`;
+        if (timeLeft <= 0) {
+            stopTimer();
+            if (isLast) {
+                renderResult();
+            } else {
+                nextQ();
+            }
+        }
+    }, 1000);
+}
+
+function stopTimer() {
+    if (timerId) {
+        clearInterval(timerId);
+        timerId = null;
+    }
+}
